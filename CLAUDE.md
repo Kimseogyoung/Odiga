@@ -9,7 +9,7 @@
 - 프론트: React 18 + TypeScript + Tailwind CSS + Vite
 - DB: Aurora Serverless v2 (MySQL 호환) — SQLAlchemy ORM
 - 캐시: Redis (EC2 self-hosted)
-- AI: OpenAI GPT-4o mini
+- AI: Claude Haiku (Anthropic SDK)
 - 지도: 카카오맵 SDK
 - 장소: Google Places API
 - 이동시간: 네이버 지도 API

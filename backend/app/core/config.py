@@ -2,19 +2,19 @@ from pydantic_settings import BaseSettings
 
 
 class Settings(BaseSettings):
-    # DB
-    DATABASE_URL: str
+    # DB (M3 이후 필요)
+    DATABASE_URL: str = ""
 
     # Redis
     REDIS_URL: str = "redis://localhost:6379"
 
-    # OpenAI
-    OPENAI_API_KEY: str
+    # Anthropic
+    ANTHROPIC_API_KEY: str
 
-    # Google Places
-    GOOGLE_PLACES_API_KEY: str
+    # Google Places (M5 이후 필요)
+    GOOGLE_PLACES_API_KEY: str = ""
 
-    # Naver Maps
+    # Naver
     NAVER_CLIENT_ID: str
     NAVER_CLIENT_SECRET: str
 
