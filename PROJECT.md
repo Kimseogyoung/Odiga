@@ -33,18 +33,20 @@
 
 ---
 
-## 기술 스택 방향
+## 기술 스택
 
 | 영역 | 선택 |
 |------|------|
-| 백엔드 | Python (FastAPI) |
-| DB | PostgreSQL + Redis |
-| 프론트 | 바닐라 HTML/JS (MVP) |
+| 백엔드 | Python + FastAPI |
+| DB | Aurora Serverless v2 (MySQL 호환) |
+| 캐시 | Redis (EC2 self-hosted) |
+| 프론트 | React + TypeScript + Tailwind CSS + Vite |
 | 지도 | 카카오맵 SDK |
 | AI | GPT-4o mini |
 | 장소 데이터 | Google Places API |
 | 이동시간 | 네이버 지도 API |
-| 인프라 | AWS |
+| 인프라 | AWS (EC2 t4g + CloudFront + S3) |
+| 인스타 자동화 | Python 스케줄러 (별도 모듈, 웹과 데이터 공유) |
 
 ---
 
