@@ -36,7 +36,7 @@ def merge_sources() -> list[dict]:
     """4개 소스 로드 후 kakao_place_id 기준 통합."""
     kakao_places = load_json(DATA_DIR / "collected_kakao.json")
     naver_data = load_json(DATA_DIR / "collected_naver.json")
-    instagram_data = load_json(DATA_DIR / "collected_instagram.json")
+    twitter_data = load_json(DATA_DIR / "collected_twitter.json")
     google_data = load_json(DATA_DIR / "collected_google.json")
 
     # 보조 소스를 kakao_place_id 기준 딕셔너리로
@@ -47,10 +47,10 @@ def merge_sources() -> list[dict]:
         r["kakao_place_id"]: r for r in google_data
     }
 
-    # 인스타는 장소명 기반이라 name으로 매핑
-    instagram_map: dict[str, int] = {}
-    for r in instagram_data:
-        instagram_map[r["name"]] = r.get("instagram_mention_count", 0)
+    # 트위터는 장소명 기반이라 name으로 매핑
+    twitter_map: dict[str, int] = {}
+    for r in twitter_data:
+        twitter_map[r["name"]] = r.get("twitter_mention_count", 0)
 
     merged: list[dict] = []
     seen: set[str] = set()
@@ -75,8 +75,8 @@ def merge_sources() -> list[dict]:
             "region_label": place["region_label"],
             # 네이버 블로그 리뷰
             "blog_reviews": naver_map.get(pid, ""),
-            # 인스타 언급 수
-            "instagram_mention_count": instagram_map.get(place["name"], 0),
+            # 트위터 언급 수
+            "twitter_mention_count": twitter_map.get(place["name"], 0),
             # 구글 상세 정보
             "google_place_id": google.get("google_place_id"),
             "rating": google.get("rating"),

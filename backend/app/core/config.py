@@ -21,6 +21,10 @@ class Settings(BaseSettings):
     # Kakao
     KAKAO_API_KEY: str
 
+    # Twitter (쿠키 기반)
+    TWITTER_AUTH_TOKEN: str = ""
+    TWITTER_CT0: str = ""
+
     # CORS
     ALLOWED_ORIGINS: list[str] = ["http://localhost:5173"]
 
