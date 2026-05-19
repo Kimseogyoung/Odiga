@@ -11,6 +11,7 @@ collect_kakao.py 실행 후 data/collected_kakao.json 이 있어야 함.
 import asyncio
 import json
 import sys
+from datetime import datetime
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent.parent / "backend"))
@@ -163,11 +164,12 @@ async def run() -> None:
             results.append(result)
 
     matched = sum(1 for r in results if r["google_place_id"])
-    OUTPUT_PATH.write_text(
-        json.dumps(results, ensure_ascii=False, indent=2),
-        encoding="utf-8",
-    )
+    data_str = json.dumps(results, ensure_ascii=False, indent=2)
+    OUTPUT_PATH.write_text(data_str, encoding="utf-8")
+    backup = OUTPUT_PATH.parent / f"collected_google_{datetime.now().strftime('%y%m%d%H%M')}.json"
+    backup.write_text(data_str, encoding="utf-8")
     print(f"Google 매칭: {matched}/{len(results)}개 → {OUTPUT_PATH}")
+    print(f"백업 → {backup.name}")
 
 
 if __name__ == "__main__":

@@ -13,6 +13,7 @@ pageable_count 45 제한을 그리드 분할로 우회.
 import asyncio
 import json
 import sys
+from datetime import datetime
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent.parent / "backend"))
@@ -163,11 +164,12 @@ async def run() -> None:
                     all_places.extend(places)
                 print(f"  키워드 '{query}': {total}개")
 
-    OUTPUT_PATH.write_text(
-        json.dumps(all_places, ensure_ascii=False, indent=2),
-        encoding="utf-8",
-    )
+    data_str = json.dumps(all_places, ensure_ascii=False, indent=2)
+    OUTPUT_PATH.write_text(data_str, encoding="utf-8")
+    backup = OUTPUT_PATH.parent / f"collected_kakao_{datetime.now().strftime('%y%m%d%H%M')}.json"
+    backup.write_text(data_str, encoding="utf-8")
     print(f"\n총 {len(all_places)}개 저장 → {OUTPUT_PATH}")
+    print(f"백업 → {backup.name}")
 
 
 if __name__ == "__main__":

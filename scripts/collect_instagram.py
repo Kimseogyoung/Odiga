@@ -12,6 +12,7 @@ import re
 import sys
 import time
 from collections import defaultdict
+from datetime import datetime
 from pathlib import Path
 
 try:
@@ -108,13 +109,14 @@ def run() -> None:
                 "instagram_mention_count": mention_count,
             })
 
-    OUTPUT_PATH.write_text(
-        json.dumps(results, ensure_ascii=False, indent=2),
-        encoding="utf-8",
-    )
+    data_str = json.dumps(results, ensure_ascii=False, indent=2)
+    OUTPUT_PATH.write_text(data_str, encoding="utf-8")
+    backup = OUTPUT_PATH.parent / f"collected_instagram_{datetime.now().strftime('%y%m%d%H%M')}.json"
+    backup.write_text(data_str, encoding="utf-8")
 
     total = sum(len(v) for v in mention_counts.values())
     print(f"\n총 {total}개 장소 언급 저장 → {OUTPUT_PATH}")
+    print(f"백업 → {backup.name}")
 
 
 if __name__ == "__main__":
