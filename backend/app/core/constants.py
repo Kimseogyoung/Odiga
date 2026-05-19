@@ -39,6 +39,28 @@ REGION_LABEL: dict[int, str] = {
     Region.YEONNAM: "연남",
 }
 
+# list of (위도, 경도, 반경m)
+# pageable_count 45 제한 우회를 위해 지역을 격자 분할.
+# 각 원 반경 500m, 인접 원과 ~30% 중복으로 누락 최소화.
+# 성수: 뚝섬역/서울숲 · 성수역 · 성수동 남쪽 3포인트
+# 홍대: 홍대입구역 · 홍대 남쪽/클럽거리 2포인트
+# 연남: 경의선숲길 중심 · 연남동 북쪽 2포인트
+REGION_GRID: dict[int, list[tuple[float, float, int]]] = {
+    Region.SEONGSU: [
+        (37.5474, 127.0447, 500),  # 뚝섬역 / 서울숲 카페거리
+        (37.5443, 127.0557, 500),  # 성수역 / 성수 카페거리
+        (37.5400, 127.0500, 500),  # 성수동 2가 남쪽
+    ],
+    Region.HONGDAE: [
+        (37.5577, 126.9247, 500),  # 홍대입구역
+        (37.5520, 126.9210, 500),  # 홍대 남쪽 / 클럽거리
+    ],
+    Region.YEONNAM: [
+        (37.5650, 126.9230, 500),  # 연남동 / 경의선 숲길 중심
+        (37.5700, 126.9270, 500),  # 연남동 북쪽
+    ],
+}
+
 PLACE_CATEGORY_LABEL: dict[int, str] = {
     PlaceCategory.RESTAURANT: "음식점",
     PlaceCategory.CAFE: "카페",

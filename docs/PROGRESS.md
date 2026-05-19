@@ -39,25 +39,25 @@
 ### 1. 수집 스크립트 4개 작성
 각 플랫폼에서 장소 데이터를 최대한 많이 수집. 특정 장소 쏠림 없이 다양하게.
 
-- [ ] `scripts/collect_kakao.py`
-  - 지역 × 카테고리 코드로 전체 수집
+- [x] `scripts/collect_kakao.py`
+  - 지역 × 카테고리 코드로 전체 수집 (페이지네이션 포함)
   - 출력: `data/collected_kakao.json`
 
-- [ ] `scripts/collect_naver.py`
+- [x] `scripts/collect_naver.py`
   - 지역 키워드로 블로그 포스트 수집 (장소명 + 리뷰 텍스트)
   - 출력: `data/collected_naver.json`
 
-- [ ] `scripts/collect_instagram.py`
-  - 지역 해시태그 기반 크롤링 (장소명, 언급 수)
+- [x] `scripts/collect_instagram.py`
+  - 지역 해시태그 기반 크롤링 instaloader (장소명, 언급 수)
   - 출력: `data/collected_instagram.json`
 
-- [ ] `scripts/collect_google.py`
-  - Google Places API (영업시간, 평점, 사진)
-  - Google Places API 키 필요 (미발급)
+- [x] `scripts/collect_google.py`
+  - Google Places API New (Text Search → Place Details)
+  - 영업시간, 평점, 리뷰 수, 사진 수
   - 출력: `data/collected_google.json`
 
 ### 2. Claude 처리 스크립트
-- [ ] `scripts/process_with_claude.py`
+- [x] `scripts/process_with_claude.py`
   - 4개 collected_*.json 읽기
   - 카카오 ID 기준 중복 제거 + 통합
   - Claude: summary + caution + keyword_id 배열 생성
@@ -67,8 +67,8 @@
 - [ ] `data/redis_data.json` 내용 확인
 
 ### 4. Redis import
-- [ ] `scripts/import_to_redis.py`
-  - redis_data.json → Redis 저장
+- [x] `scripts/import_to_redis.py`
+  - redis_data.json → Redis 저장 (상세 + 검색 인덱스)
 
 ---
 
