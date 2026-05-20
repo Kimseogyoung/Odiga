@@ -1,4 +1,7 @@
+from pathlib import Path
 from pydantic_settings import BaseSettings
+
+_ENV_PATH = Path(__file__).parent.parent.parent / ".env"
 
 
 class Settings(BaseSettings):
@@ -10,6 +13,7 @@ class Settings(BaseSettings):
 
     # Anthropic
     ANTHROPIC_API_KEY: str
+
 
     # Google Places (M5 이후 필요)
     GOOGLE_PLACES_API_KEY: str = ""
@@ -28,7 +32,7 @@ class Settings(BaseSettings):
     # CORS
     ALLOWED_ORIGINS: list[str] = ["http://localhost:5173"]
 
-    model_config = {"env_file": ".env"}
+    model_config = {"env_file": str(_ENV_PATH)}
 
 
 settings = Settings()

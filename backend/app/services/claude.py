@@ -14,7 +14,7 @@ _SUMMARIZE_TEMPLATE = """장소명: {name}
 카테고리: {category}
 블로그 리뷰:
 {reviews}
-
+{tweets_section}
 위 정보를 바탕으로 아래 JSON 형식으로만 응답하세요:
 {{
   "summary": "이 장소의 특징을 담은 한 줄 소개. 장소명 그대로 쓰지 말고 특징을 설명할 것. (예: '성수 감성 뜨개카페. 취미 재료 구비.')",
@@ -36,10 +36,21 @@ _KEYWORD_TEMPLATE = """장소명: {name}
 예시: [1, 4, 7]"""
 
 
-async def summarize_place(name: str, category: str, reviews: str) -> dict:
-    """장소 정보 + 블로그 리뷰 → 한줄 요약 + 주의사항 생성."""
-    if not reviews:
+async def summarize_place(
+    name: str,
+    category: str,
+    reviews: str,
+    tweets: list[str] | None = None,
+) -> dict:
+    """장소 정보 + 블로그 리뷰 + SNS 트윗 → 한줄 요약 + 주의사항 생성."""
+    tweets = tweets or []
+    if not reviews and not tweets:
         return {"summary": f"{category} 장소입니다.", "caution": ""}
+
+    tweets_section = ""
+    if tweets:
+        lines = "\n".join(f"- {t[:120]}" for t in tweets[:5])
+        tweets_section = f"SNS 트윗:\n{lines}\n"
 
     message = _client.messages.create(
         model="claude-haiku-4-5-20251001",
@@ -48,7 +59,10 @@ async def summarize_place(name: str, category: str, reviews: str) -> dict:
         messages=[{
             "role": "user",
             "content": _SUMMARIZE_TEMPLATE.format(
-                name=name, category=category, reviews=reviews[:1500]
+                name=name,
+                category=category,
+                reviews=reviews[:1500] if reviews else "없음",
+                tweets_section=tweets_section,
             ),
         }],
     )
