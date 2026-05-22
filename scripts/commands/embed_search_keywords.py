@@ -13,7 +13,7 @@ import sys
 from itertools import combinations
 from pathlib import Path
 
-DATA_DIR    = Path(__file__).parent.parent / "data"
+DATA_DIR    = Path(__file__).parent.parent.parent / "data"
 OUTPUT_PATH = DATA_DIR / "search_keywords.json"
 
 BATCH_SIZE    = 256
@@ -61,7 +61,7 @@ def _save_to_json(results: list[tuple[tuple[int, ...], str, list[float]]]) -> No
 
 
 async def _save_to_redis(results: list[tuple[tuple[int, ...], str, list[float]]]) -> None:
-    sys.path.insert(0, str(Path(__file__).parent.parent / "backend"))
+    sys.path.insert(0, str(Path(__file__).parent.parent.parent / "backend"))
     from app.core.redis import init_redis, close_redis, get_redis
     from app.services.place_store import _keyword_key
 
@@ -85,7 +85,7 @@ async def _save_to_redis(results: list[tuple[tuple[int, ...], str, list[float]]]
 
 
 def run(storage: str) -> None:
-    sys.path.insert(0, str(Path(__file__).parent.parent / "backend"))
+    sys.path.insert(0, str(Path(__file__).parent.parent.parent / "backend"))
     from app.core.constants import KEYWORD_LABEL
 
     results = _generate(KEYWORD_LABEL)

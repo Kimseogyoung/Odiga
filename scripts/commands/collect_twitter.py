@@ -34,13 +34,13 @@ try:
 except ImportError:
     _STEALTH = False
 
-sys.path.insert(0, str(Path(__file__).parent.parent / "backend"))
+sys.path.insert(0, str(Path(__file__).parent.parent.parent / "backend"))
 
 from app.core.config import settings
 
 
-OUTPUT_PATH       = Path(__file__).parent.parent / "data" / "collected_twitter.json"
-CHECKPOINT_PATH   = Path(__file__).parent.parent / "data" / "twitter_checkpoint.json"
+OUTPUT_PATH       = Path(__file__).parent.parent.parent / "data" / "collected_twitter.json"
+CHECKPOINT_PATH   = Path(__file__).parent.parent.parent / "data" / "twitter_checkpoint.json"
 
 REGION_QUERIES: dict[str, list[str]] = {
     "성수": [

@@ -16,7 +16,7 @@ import sys
 from datetime import datetime
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).parent.parent / "backend"))
+sys.path.insert(0, str(Path(__file__).parent.parent.parent / "backend"))
 
 import httpx
 from app.core.config import settings
@@ -25,7 +25,7 @@ from app.core.constants import REGION_LABEL, REGION_GRID, KAKAO_CATEGORY_MAP, Pl
 
 KAKAO_CATEGORY_URL = "https://dapi.kakao.com/v2/local/search/category.json"
 KAKAO_KEYWORD_URL  = "https://dapi.kakao.com/v2/local/search/keyword.json"
-OUTPUT_PATH = Path(__file__).parent.parent / "data" / "collected_kakao.json"
+OUTPUT_PATH = Path(__file__).parent.parent.parent / "data" / "collected_kakao.json"
 
 CATEGORY_CODES = [
     ("FD6", "음식점"),

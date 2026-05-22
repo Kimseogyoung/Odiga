@@ -13,15 +13,15 @@ import sys
 from datetime import datetime
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).parent.parent / "backend"))
+sys.path.insert(0, str(Path(__file__).parent.parent.parent / "backend"))
 
 import httpx
 from app.core.config import settings
 
 
 NAVER_BLOG_URL = "https://openapi.naver.com/v1/search/blog.json"
-INPUT_PATH = Path(__file__).parent.parent / "data" / "collected_kakao.json"
-OUTPUT_PATH = Path(__file__).parent.parent / "data" / "collected_naver.json"
+INPUT_PATH = Path(__file__).parent.parent.parent / "data" / "collected_kakao.json"
+OUTPUT_PATH = Path(__file__).parent.parent.parent / "data" / "collected_naver.json"
 
 DISPLAY = 5        # 장소당 블로그 포스트 수
 CONCURRENCY = 3    # 네이버 API rate limit 대응

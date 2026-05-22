@@ -14,7 +14,7 @@ import sys
 from collections import defaultdict
 from pathlib import Path
 
-DATA_DIR    = Path(__file__).parent.parent / "data"
+DATA_DIR    = Path(__file__).parent.parent.parent / "data"
 INPUT_PATH  = DATA_DIR / "merged_places.json"
 OUTPUT_PATH = DATA_DIR / "place_vectors.json"
 
@@ -64,7 +64,7 @@ def _save_to_json(places: list[dict]) -> None:
 
 
 async def _save_to_redis(places: list[dict]) -> None:
-    sys.path.insert(0, str(Path(__file__).parent.parent / "backend"))
+    sys.path.insert(0, str(Path(__file__).parent.parent.parent / "backend"))
     from app.core.redis import init_redis, close_redis, get_redis
     from app.core.constants import REGION_LABEL
     from app.services.place_store import save_region_category_vectors

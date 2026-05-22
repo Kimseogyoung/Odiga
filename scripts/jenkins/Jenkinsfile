@@ -1,0 +1,80 @@
+pipeline {
+    agent {
+        dockerfile {
+            filename 'scripts/jenkins/Dockerfile.pipeline'
+            // jenkins_home 안의 model-cache를 컨테이너에 마운트 (재다운로드 방지)
+            args '--network host -v jenkins_home:/var/jenkins_home'
+        }
+    }
+
+    environment {
+        REDIS_URL  = 'redis://host.docker.internal:6379'
+        PYTHONPATH = "${WORKSPACE}/backend"
+        // HuggingFace 모델 캐시 경로 (jenkins_home 볼륨 내 공유)
+        HF_HOME    = '/var/jenkins_home/model-cache/huggingface'
+
+        // Jenkins Credentials에 등록된 API 키들
+        // Manage Jenkins → Credentials에서 각 ID로 Secret text 등록
+        KAKAO_API_KEY       = credentials('KAKAO_API_KEY')
+        ANTHROPIC_API_KEY   = credentials('ANTHROPIC_API_KEY')
+        NAVER_CLIENT_ID     = credentials('NAVER_CLIENT_ID')
+        NAVER_CLIENT_SECRET = credentials('NAVER_CLIENT_SECRET')
+        TWITTER_AUTH_TOKEN  = credentials('TWITTER_AUTH_TOKEN')
+        TWITTER_CT0         = credentials('TWITTER_CT0')
+    }
+
+    stages {
+
+        stage('초기화') {
+            steps {
+                sh 'mkdir -p data'
+            }
+        }
+
+        stage('수집: 카카오') {
+            steps {
+                sh 'python scripts/pipeline.py collect-kakao'
+            }
+        }
+
+        stage('수집: 네이버') {
+            steps {
+                sh 'python scripts/pipeline.py collect-naver'
+            }
+        }
+
+        stage('수집: 트위터') {
+            steps {
+                sh 'python scripts/pipeline.py collect-twitter'
+            }
+        }
+
+        stage('병합') {
+            steps {
+                sh 'python scripts/pipeline.py merge'
+            }
+        }
+
+        stage('임베딩: 장소') {
+            steps {
+                sh 'python scripts/pipeline.py embed-places --storage redis'
+            }
+        }
+
+        stage('임베딩: 키워드') {
+            steps {
+                sh 'python scripts/pipeline.py embed-search-keywords --storage redis'
+            }
+        }
+
+    }
+
+    post {
+        success {
+            echo '파이프라인 완료 — Redis 데이터 갱신됨'
+        }
+        failure {
+            echo '파이프라인 실패 — 위 단계 로그 확인'
+        }
+    }
+}

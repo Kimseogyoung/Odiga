@@ -17,12 +17,12 @@ from pathlib import Path
 import anthropic
 import httpx
 
-sys.path.insert(0, str(Path(__file__).parent.parent / "backend"))
+sys.path.insert(0, str(Path(__file__).parent.parent.parent / "backend"))
 
 from app.core.config import settings
 from app.core.constants import KAKAO_CATEGORY_MAP, PlaceCategory
 
-DATA_DIR    = Path(__file__).parent.parent / "data"
+DATA_DIR    = Path(__file__).parent.parent.parent / "data"
 OUTPUT_PATH = DATA_DIR / "merged_places.json"
 
 KAKAO_LOCAL_URL = "https://dapi.kakao.com/v2/local/search/keyword.json"
