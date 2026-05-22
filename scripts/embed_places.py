@@ -1,11 +1,10 @@
 """
 merged_places.json을 읽어 각 장소의 임베딩 벡터 생성.
---save-to-redis 플래그를 주면 생성 후 Redis 저장까지 이어서 실행.
 
-실행: python scripts/embed_places.py
-      python scripts/embed_places.py --save-to-redis
+실행:
+  python scripts/embed_places.py --storage json    # data/place_vectors.json 저장
+  python scripts/embed_places.py --storage redis   # Redis 저장
 입력: data/merged_places.json  (merge_places.py 먼저 실행 필요)
-출력: data/place_vectors.json
 의존성: pip install sentence-transformers
 """
 import argparse
@@ -55,6 +54,15 @@ def _generate_vectors(places: list[dict]) -> list[dict]:
     return places
 
 
+def _save_to_json(places: list[dict]) -> None:
+    OUTPUT_PATH.write_text(
+        json.dumps(places, ensure_ascii=False, indent=2),
+        encoding="utf-8",
+    )
+    print(f"저장 완료 → {OUTPUT_PATH}")
+    print(f"벡터 차원: {len(places[0]['embedding'])}")
+
+
 async def _save_to_redis(places: list[dict]) -> None:
     sys.path.insert(0, str(Path(__file__).parent.parent / "backend"))
     from app.core.redis import init_redis, close_redis, get_redis
@@ -67,7 +75,6 @@ async def _save_to_redis(places: list[dict]) -> None:
     await init_redis()
     redis = await get_redis()
 
-    # 장소 메타 배치 저장 (pipeline)
     pipe = redis.pipeline()
     for place in places:
         pid = place["kakao_place_id"]
@@ -76,11 +83,10 @@ async def _save_to_redis(places: list[dict]) -> None:
     await pipe.execute()
     print(f"  detail {len(places)}개 저장 완료")
 
-    # 지역×카테고리 단위로 그룹핑
     groups: dict[tuple[int, int], list[tuple[str, list[float]]]] = defaultdict(list)
     skipped = 0
     for place in places:
-        region_id = label_to_region_id.get(place.get("region_label", ""))
+        region_id   = label_to_region_id.get(place.get("region_label", ""))
         category_id = place.get("category_id")
         if region_id is None or category_id is None:
             skipped += 1
@@ -89,14 +95,12 @@ async def _save_to_redis(places: list[dict]) -> None:
             (place["kakao_place_id"], place["embedding"])
         )
 
-    # 그룹별 벡터 저장
     for (region_id, category_id), entries in groups.items():
-        ids        = [e[0] for e in entries]
+        ids         = [e[0] for e in entries]
         matrix_flat = [v for _, vec in entries for v in vec]
         await save_region_category_vectors(region_id, category_id, ids, matrix_flat)
 
     await close_redis()
-
     print(f"  벡터 DB {len(groups)}개 조합 저장 완료")
     for (rid, cid), entries in sorted(groups.items()):
         print(f"    region={rid} × category={cid}: {len(entries)}개")
@@ -104,7 +108,7 @@ async def _save_to_redis(places: list[dict]) -> None:
         print(f"  ⚠ region/category 없어서 스킵: {skipped}개")
 
 
-def run(save_to_redis: bool = False) -> None:
+def run(storage: str) -> None:
     if not INPUT_PATH.exists():
         print("오류: merged_places.json 없음. 먼저 merge_places.py를 실행하세요.")
         sys.exit(1)
@@ -114,19 +118,17 @@ def run(save_to_redis: bool = False) -> None:
 
     places = _generate_vectors(places)
 
-    OUTPUT_PATH.write_text(
-        json.dumps(places, ensure_ascii=False, indent=2),
-        encoding="utf-8",
-    )
-    print(f"\n완료 → {OUTPUT_PATH}")
-    print(f"벡터 차원: {len(places[0]['embedding'])}")
-
-    if save_to_redis:
+    if storage == "json":
+        _save_to_json(places)
+    else:
         asyncio.run(_save_to_redis(places))
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--save-to-redis", action="store_true", help="생성 후 Redis에도 저장")
+    parser.add_argument(
+        "--storage", choices=["json", "redis"], required=True,
+        help="저장 방식 선택: json → place_vectors.json, redis → Redis 저장",
+    )
     args = parser.parse_args()
-    run(save_to_redis=args.save_to_redis)
+    run(storage=args.storage)

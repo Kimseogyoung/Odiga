@@ -62,6 +62,23 @@ async def get_region_category_vectors(
     return json.loads(ids_data), json.loads(matrix_data)
 
 
+# ── 키워드 쿼리 벡터 ─────────────────────────────────────────────────────────
+
+def _keyword_key(keyword_ids: list[int]) -> str:
+    return "query:keyword:" + ",".join(str(k) for k in sorted(keyword_ids))
+
+
+async def save_keyword_vector(keyword_ids: list[int], vector: list[float]) -> None:
+    redis = await get_redis()
+    await redis.set(_keyword_key(keyword_ids), json.dumps(vector), ex=TTL_VECTOR)
+
+
+async def get_keyword_vector(keyword_ids: list[int]) -> list[float] | None:
+    redis = await get_redis()
+    data = await redis.get(_keyword_key(keyword_ids))
+    return json.loads(data) if data else None
+
+
 # ── AI 요약 (M2) ──────────────────────────────────────────────────────────────
 
 async def save_summary(kakao_place_id: str, summary: dict) -> None:
