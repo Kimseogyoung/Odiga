@@ -12,6 +12,7 @@ import argparse
 import asyncio
 import json
 import sys
+from collections import defaultdict
 from pathlib import Path
 
 DATA_DIR    = Path(__file__).parent.parent / "data"
@@ -57,30 +58,50 @@ def _generate_vectors(places: list[dict]) -> list[dict]:
 async def _save_to_redis(places: list[dict]) -> None:
     sys.path.insert(0, str(Path(__file__).parent.parent / "backend"))
     from app.core.redis import init_redis, close_redis, get_redis
+    from app.core.constants import REGION_LABEL
+    from app.services.place_store import save_region_category_vectors
+
+    label_to_region_id = {v: k for k, v in REGION_LABEL.items()}
 
     print(f"\nRedis 저장 시작 ({len(places)}개)...")
     await init_redis()
     redis = await get_redis()
 
+    # 장소 메타 배치 저장 (pipeline)
     pipe = redis.pipeline()
-    all_ids: list[str] = []
-
     for place in places:
         pid = place["kakao_place_id"]
-        all_ids.append(pid)
-
         detail = {k: v for k, v in place.items() if k != "embedding"}
-        vector = place.get("embedding")
-
         pipe.set(f"places:detail:{pid}", json.dumps(detail, ensure_ascii=False), ex=TTL)
-        if vector is not None:
-            pipe.set(f"places:vector:{pid}", json.dumps(vector), ex=TTL)
-
-    pipe.set("places:all_ids", json.dumps(all_ids), ex=TTL)
     await pipe.execute()
+    print(f"  detail {len(places)}개 저장 완료")
+
+    # 지역×카테고리 단위로 그룹핑
+    groups: dict[tuple[int, int], list[tuple[str, list[float]]]] = defaultdict(list)
+    skipped = 0
+    for place in places:
+        region_id = label_to_region_id.get(place.get("region_label", ""))
+        category_id = place.get("category_id")
+        if region_id is None or category_id is None:
+            skipped += 1
+            continue
+        groups[(region_id, category_id)].append(
+            (place["kakao_place_id"], place["embedding"])
+        )
+
+    # 그룹별 벡터 저장
+    for (region_id, category_id), entries in groups.items():
+        ids        = [e[0] for e in entries]
+        matrix_flat = [v for _, vec in entries for v in vec]
+        await save_region_category_vectors(region_id, category_id, ids, matrix_flat)
 
     await close_redis()
-    print(f"Redis 저장 완료 — detail {len(places)}개, vector {len(places)}개, all_ids 갱신")
+
+    print(f"  벡터 DB {len(groups)}개 조합 저장 완료")
+    for (rid, cid), entries in sorted(groups.items()):
+        print(f"    region={rid} × category={cid}: {len(entries)}개")
+    if skipped:
+        print(f"  ⚠ region/category 없어서 스킵: {skipped}개")
 
 
 def run(save_to_redis: bool = False) -> None:
