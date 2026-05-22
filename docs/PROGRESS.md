@@ -54,20 +54,39 @@
 
 ---
 
+## 다음 할 일 (M1 미완료)
+
+### 1. Redis 저장 구조 구현
+- 설계된 테이블 구조로 Redis에 장소 데이터 저장 (메타 + 임베딩 벡터 포함)
+- `scripts/import_to_redis.py` 재작성 — place_vectors.json → Redis (구설계 대체)
+- 저장 옵션: `storage: "redis" | "json"` request body 파라미터로 선택 가능하게
+
+### 2. 쿼리 벡터 사전 생성 및 검색 캐싱
+- `scripts/generate_query_vectors.py` — 지역×테마 조합(~25개) 쿼리 벡터 사전 생성
+- Redis에 `query_vector:{region}:{theme}` 키로 저장
+- 검색 결과(top 20)도 `search_result:{region}:{theme}` 키로 캐싱
+- 런타임에 ko-sroberta 모델 실행 불필요
+
+### 3. 데이터 수집 파이프라인 FastAPI 연동
+- 각 수집 스크립트를 FastAPI POST 엔드포인트로 래핑
+- long-running 작업은 `BackgroundTasks`로 처리
+- 엔드포인트: `/admin/collect/kakao`, `/admin/collect/naver`, `/admin/collect/twitter`, `/admin/pipeline/merge`, `/admin/pipeline/embed`
+
+### 4. CI/CD 트리거 파이프라인
+- TeamCity 또는 Jenkins로 파이프라인 구성
+- 트리거 → 데이터 수집 → 병합/임베딩 → Redis 저장 자동화
+
+---
+
 ## 다음 할 일 (M2)
 
-### 1. 벡터 DB 세팅
-- Aurora Serverless에 pgvector 익스텐션 추가
-- `places` 테이블 생성 (메타 + embedding 컬럼)
-- `scripts/import_to_pgvector.py` 작성 — place_vectors.json → DB
-
-### 2. 플래너 API 구현
+### 1. 플래너 API 구현
 - `POST /api/plan` — region + theme 입력
-- 임베딩 검색으로 후보 20개 추출
+- Redis에서 쿼리 벡터 로드 → numpy 코사인 유사도 → 후보 20개 추출
 - Claude Haiku로 하루 코스 생성 (이동시간 포함)
 - 응답: 시간표 JSON
 
-### 3. 프론트엔드 (M3)
+### 2. 프론트엔드 (M3)
 - React 입력 폼 (지역 + 테마)
 - 코스 시간표 UI
 
@@ -82,7 +101,9 @@
 | 트위터 인증 | 쿠키 방식 |
 | 사전처리 방식 | Claude 요약 → 임베딩 벡터로 전환 |
 | 임베딩 모델 | OpenAI 대신 로컬 ko-sroberta (무료) |
-| 벡터 DB | pgvector on Aurora (별도 인프라 불필요) |
+| 벡터 DB | MVP 단계는 Redis — Aurora pgvector는 고도화 단계에서 |
+| 런타임 모델 실행 | 지역×테마 조합 쿼리 벡터 사전 생성 → Redis 캐싱으로 모델 실행 불필요 |
+| 데이터 파이프라인 트리거 | CI/CD(TeamCity or Jenkins) 연동 예정 |
 
 ---
 
@@ -120,10 +141,9 @@ scripts/
   collect_twitter.py    ✅ 실행완료
   collect_google.py     ✅ 작성완료 (스킵)
   merge_places.py       ✅ 실행완료
-  generate_embeddings.py ✅ 실행완료
-  test_search.py        ✅ 동작확인
-  process_with_claude.py ⚠️ 구설계 잔존 — M2에서 제거 예정
-  import_to_redis.py    ⚠️ 구설계 잔존 — pgvector로 대체 예정
+  embed_places.py        ✅ 실행완료 (구 generate_embeddings.py — --save-to-redis 플래그 추가)
+  test_search.py         ✅ 동작확인
+  process_with_claude.py ⚠️ 구설계 잔존 — 제거 예정
 
 data/
   collected_kakao.json    ✅

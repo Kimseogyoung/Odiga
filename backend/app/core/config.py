@@ -10,6 +10,7 @@ class Settings(BaseSettings):
 
     # Redis
     REDIS_URL: str = "redis://localhost:6379"
+    REDIS_KEY_PREFIX: str = "odiga"
 
     # Anthropic
     ANTHROPIC_API_KEY: str
