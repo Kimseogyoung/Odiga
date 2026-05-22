@@ -5,19 +5,12 @@ _ENV_PATH = Path(__file__).parent.parent.parent.parent / ".env"
 
 
 class Settings(BaseSettings):
-    # DB (M3 이후 필요)
-    DATABASE_URL: str = ""
-
     # Redis
     REDIS_URL: str = "redis://localhost:6379"
     REDIS_KEY_PREFIX: str = "odiga"
 
     # Anthropic
     ANTHROPIC_API_KEY: str
-
-
-    # Google Places (M5 이후 필요)
-    GOOGLE_PLACES_API_KEY: str = ""
 
     # Naver
     NAVER_CLIENT_ID: str
@@ -26,7 +19,7 @@ class Settings(BaseSettings):
     # Kakao
     KAKAO_API_KEY: str
 
-    # Twitter (쿠키 기반)
+    # Twitter (쿠키 기반 — 수동 수집용)
     TWITTER_AUTH_TOKEN: str = ""
     TWITTER_CT0: str = ""
 
