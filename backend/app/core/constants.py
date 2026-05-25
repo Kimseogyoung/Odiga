@@ -97,19 +97,22 @@ STAY_MINUTES: dict[int, int] = {
 }
 
 # 카카오맵 카테고리 원본 → PlaceCategory 매핑
+# 카카오는 "음식점 > 카페" 형태로 상위 카테고리를 앞에 붙임.
+# "음식점"을 먼저 두면 카페·술집도 음식점으로 오분류되므로
+# 구체적인 하위 카테고리를 앞에, "음식점"은 마지막에 배치.
 KAKAO_CATEGORY_MAP: dict[str, int] = {
-    "음식점": PlaceCategory.RESTAURANT,
     "카페": PlaceCategory.CAFE,
     "디저트": PlaceCategory.CAFE,
     "제과,베이커리": PlaceCategory.CAFE,
-    "쇼핑": PlaceCategory.SHOPPING,
-    "의류": PlaceCategory.SHOPPING,
     "술집": PlaceCategory.BAR,
     "호프": PlaceCategory.BAR,
     "바": PlaceCategory.BAR,
     "문화시설": PlaceCategory.CULTURE,
     "전시": PlaceCategory.CULTURE,
     "갤러리": PlaceCategory.CULTURE,
+    "쇼핑": PlaceCategory.SHOPPING,
+    "의류": PlaceCategory.SHOPPING,
+    "음식점": PlaceCategory.RESTAURANT,
 }
 
 # 키워드 → 카카오 검색 쿼리 접미어 목록 (복수 쿼리 → 결과 합산)

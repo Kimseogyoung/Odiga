@@ -107,6 +107,7 @@ def merge_kakao_naver(twitter_data: list[dict]) -> tuple[list[dict], dict[str, l
         blog_reviews, blog_count = naver_map.get(pid, ("", 0))
         places.append({
             **place,
+            "category_id":  _parse_category(place.get("kakao_category", "")),  # 수정된 맵으로 재계산
             "blog_reviews": blog_reviews,
             "blog_count":   blog_count,
             "tweets":       [],
