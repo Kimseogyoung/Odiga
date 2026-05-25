@@ -66,8 +66,8 @@ def _save_to_json(places: list[dict]) -> None:
 async def _save_to_redis(places: list[dict]) -> None:
     sys.path.insert(0, str(Path(__file__).parent.parent.parent / "backend"))
     from app.core.redis import init_redis, close_redis, get_redis
-    from app.core.constants import REGION_LABEL
-    from app.services.place_store import save_region_category_vectors
+    from app.core.constants import REGION_LABEL, CATEGORY_SUBCATEGORIES, SUBCATEGORY_KEYWORDS
+    from app.services.place_store import save_region_category_vectors, save_subcategory_ids
 
     label_to_region_id = {v: k for k, v in REGION_LABEL.items()}
 
@@ -75,6 +75,7 @@ async def _save_to_redis(places: list[dict]) -> None:
     await init_redis()
     redis = await get_redis()
 
+    # 1. detail 저장
     pipe = redis.pipeline()
     for place in places:
         pid = place["kakao_place_id"]
@@ -83,7 +84,8 @@ async def _save_to_redis(places: list[dict]) -> None:
     await pipe.execute()
     print(f"  detail {len(places)}개 저장 완료")
 
-    groups: dict[tuple[int, int], list[tuple[str, list[float]]]] = defaultdict(list)
+    # 2. 지역×카테고리 그룹 빌드 (full place dict 유지)
+    groups: dict[tuple[int, int], list[dict]] = defaultdict(list)
     skipped = 0
     for place in places:
         region_id   = label_to_region_id.get(place.get("region_label", ""))
@@ -91,19 +93,32 @@ async def _save_to_redis(places: list[dict]) -> None:
         if region_id is None or category_id is None:
             skipped += 1
             continue
-        groups[(region_id, category_id)].append(
-            (place["kakao_place_id"], place["embedding"])
-        )
+        groups[(region_id, category_id)].append(place)
 
-    for (region_id, category_id), entries in groups.items():
-        ids         = [e[0] for e in entries]
-        matrix_flat = [v for _, vec in entries for v in vec]
+    # 3. 카테고리별 벡터 저장
+    for (region_id, category_id), group_places in groups.items():
+        ids         = [p["kakao_place_id"] for p in group_places]
+        matrix_flat = [v for p in group_places for v in p["embedding"]]
         await save_region_category_vectors(region_id, category_id, ids, matrix_flat)
+
+    # 4. 서브카테고리 ID 인덱스 저장
+    sub_total = 0
+    for (region_id, category_id), group_places in groups.items():
+        for sub_id in CATEGORY_SUBCATEGORIES.get(category_id, []):
+            kw_list = SUBCATEGORY_KEYWORDS.get(sub_id, [])
+            sub_ids = [
+                p["kakao_place_id"] for p in group_places
+                if any(kw in p.get("kakao_category", "") for kw in kw_list)
+            ]
+            if sub_ids:
+                await save_subcategory_ids(region_id, category_id, sub_id, sub_ids)
+                sub_total += 1
 
     await close_redis()
     print(f"  벡터 DB {len(groups)}개 조합 저장 완료")
-    for (rid, cid), entries in sorted(groups.items()):
-        print(f"    region={rid} × category={cid}: {len(entries)}개")
+    for (rid, cid), group_places in sorted(groups.items()):
+        print(f"    region={rid} × category={cid}: {len(group_places)}개")
+    print(f"  서브카테고리 인덱스 {sub_total}개 저장 완료")
     if skipped:
         print(f"  ⚠ region/category 없어서 스킵: {skipped}개")
 

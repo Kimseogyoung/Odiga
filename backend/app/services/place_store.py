@@ -58,6 +58,28 @@ async def get_region_category_vectors(
     return json.loads(ids_data), json.loads(matrix_data)
 
 
+async def save_subcategory_ids(
+    region_id: int,
+    category_id: int,
+    sub_id: int,
+    ids: list[str],
+) -> None:
+    redis = await get_redis()
+    key = f"places:vectors:{region_id}:{category_id}:{sub_id}:ids"
+    await redis.set(key, json.dumps(ids), ex=settings.TTL_PLACE_VECTOR_SECONDS)
+
+
+async def get_subcategory_ids(
+    region_id: int,
+    category_id: int,
+    sub_id: int,
+) -> list[str] | None:
+    redis = await get_redis()
+    key = f"places:vectors:{region_id}:{category_id}:{sub_id}:ids"
+    data = await redis.get(key)
+    return json.loads(data) if data else None
+
+
 # ── 키워드 쿼리 벡터 ─────────────────────────────────────────────────────────
 
 def _keyword_key(keyword_ids: list[int]) -> str:

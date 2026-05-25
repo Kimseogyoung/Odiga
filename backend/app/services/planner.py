@@ -318,14 +318,19 @@ async def search_candidates(
     top_k: int = 3,
     prev_lat: float | None = None,
     prev_lng: float | None = None,
-    subcategory_keywords: list[str] | None = None,
+    subcategory_id: int | None = None,
 ) -> list[PlaceCandidate]:
     """
-    1. 코사인 유사도 상위 pool 추출
-    2. detail 병렬 조회 → scorer로 재정렬 (blog_count 기반)
-    3. 재정렬된 pool에서 랜덤 top_k 추출
-    4. summary 병렬 조회 후 PlaceCandidate 조립
+    1. 서브카테고리 사전 인덱스(ID 목록)로 매트릭스 사전 필터
+       → 인덱스 미생성 시 SUBCATEGORY_KEYWORDS 키워드 필터로 폴백
+       → subcategory_id=None 이면 전체 카테고리 매트릭스 사용
+    2. 코사인 유사도 상위 pool 추출
+    3. detail 병렬 조회 → scorer로 재정렬 (blog_count 기반)
+    4. 재정렬된 pool에서 랜덤 top_k 추출
+    5. summary 병렬 조회 후 PlaceCandidate 조립
     """
+    from app.core.constants import SUBCATEGORY_KEYWORDS
+
     query_raw, vec_result = await asyncio.gather(
         place_store.get_keyword_vector(keyword_ids),
         _get_vectors(region_id, category_id),
@@ -335,18 +340,38 @@ async def search_candidates(
 
     query_vec = np.array(query_raw, dtype=np.float32)
     ids, matrix = vec_result
-    pool_ids = _cosine_top_k(query_vec, ids, matrix, exclude_ids, _CANDIDATE_POOL_SIZE)
+
+    # 서브카테고리 사전 인덱스 적용
+    fallback_kw_filter = False
+    if subcategory_id is not None:
+        sub_ids = await place_store.get_subcategory_ids(region_id, category_id, subcategory_id)
+        if sub_ids:
+            sub_set = set(sub_ids)
+            mask = [i for i, pid in enumerate(ids) if pid in sub_set]
+            search_ids = [ids[i] for i in mask]
+            search_matrix = matrix[mask]
+        else:
+            # 인덱스 미생성: 전체 매트릭스로 코사인 후 detail 단계에서 키워드 필터
+            search_ids, search_matrix = ids, matrix
+            fallback_kw_filter = True
+    else:
+        search_ids, search_matrix = ids, matrix
+
+    pool_ids = _cosine_top_k(query_vec, search_ids, search_matrix, exclude_ids, _CANDIDATE_POOL_SIZE)
     if not pool_ids:
         return []
 
-    # pool 전체 detail 병렬 조회 → 세부 카테고리 필터 → scorer 재정렬
+    # pool 전체 detail 병렬 조회
     details = await asyncio.gather(*[place_store.get_detail(pid) for pid in pool_ids])
 
-    if subcategory_keywords:
-        details = [
-            d for d in details
-            if d and any(kw in d.get("kakao_category", "") for kw in subcategory_keywords)
-        ]
+    # 폴백 모드: 키워드로 detail 필터 (인덱스 미생성 시에만)
+    if fallback_kw_filter:
+        kw_list = SUBCATEGORY_KEYWORDS.get(subcategory_id, [])
+        if kw_list:
+            details = [
+                d for d in details
+                if d and any(kw in d.get("kakao_category", "") for kw in kw_list)
+            ]
 
     scorer = get_scorer()
     scored = sorted(

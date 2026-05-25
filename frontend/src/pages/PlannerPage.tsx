@@ -19,8 +19,7 @@ export default function PlannerPage() {
   const [slot, setSlot] = useState<SlotInfo | null>(state?.slot ?? null);
   const [totalSlots] = useState(state?.total_slots ?? 1);
   const [categoryId, setCategoryId] = useState<number | null>(null);
-  const [subcategoryLabel, setSubcategoryLabel] = useState<string>('전체');
-  const [subcategoryKeywords, setSubcategoryKeywords] = useState<string[]>([]);
+  const [subcategoryId, setSubcategoryId] = useState<number | null>(null); // null = 전체
   const [candidateCache, setCandidateCache] = useState<Record<string, PlaceCandidate[]>>({});
   const [loadingCandidates, setLoadingCandidates] = useState(false);
   const [picking, setPicking] = useState(false);
@@ -28,7 +27,7 @@ export default function PlannerPage() {
   const [refreshCooldown, setRefreshCooldown] = useState(0);
   const [seenIds, setSeenIds] = useState<string[]>([]);
 
-  const cacheKey = categoryId !== null ? `${categoryId}_${subcategoryLabel}` : '';
+  const cacheKey = categoryId !== null ? `${categoryId}_${subcategoryId ?? 'all'}` : '';
   const candidates = cacheKey ? (candidateCache[cacheKey] ?? []) : [];
   const [constants, setConstants] = useState<Constants | null>(null);
 
@@ -41,28 +40,25 @@ export default function PlannerPage() {
   async function handleFetchCandidates(
     extraExcludeIds: string[] = [],
     catId?: number,
-    subLabel?: string,
-    subKeywords?: string[],
+    subId?: number | null,
   ) {
     if (!sessionId) return;
     const targetCatId = catId ?? categoryId;
     if (targetCatId === null) return;
-    const targetSubLabel = subLabel ?? subcategoryLabel;
-    const targetSubKeywords = subKeywords ?? subcategoryKeywords;
-    const key = `${targetCatId}_${targetSubLabel}`;
+    const targetSubId = subId !== undefined ? subId : subcategoryId;
+    const key = `${targetCatId}_${targetSubId ?? 'all'}`;
 
     // 캐시 히트: 새로고침 요청이 아니면 즉시 반환
     if (extraExcludeIds.length === 0 && (candidateCache[key]?.length ?? 0) > 0) {
       setCategoryId(targetCatId);
-      setSubcategoryLabel(targetSubLabel);
-      setSubcategoryKeywords(targetSubKeywords);
+      setSubcategoryId(targetSubId);
       return;
     }
 
     setError('');
     setLoadingCandidates(true);
     try {
-      const res = await getCandidates(sessionId, targetCatId, extraExcludeIds, targetSubKeywords);
+      const res = await getCandidates(sessionId, targetCatId, extraExcludeIds, targetSubId);
       if (res.candidates.length === 0) {
         setError('해당 조건의 장소가 없습니다. 다른 항목을 선택해 보세요.');
       }
@@ -84,7 +80,7 @@ export default function PlannerPage() {
         return prev - 1;
       });
     }, 1000);
-    await handleFetchCandidates(seenIds, undefined, subcategoryLabel, subcategoryKeywords);
+    await handleFetchCandidates(seenIds, undefined, subcategoryId);
   }
 
   async function handlePick(place: PlaceCandidate) {
@@ -99,8 +95,7 @@ export default function PlannerPage() {
         setSlot(res.slot);
         setCandidateCache({});
         setCategoryId(null);
-        setSubcategoryLabel('전체');
-        setSubcategoryKeywords([]);
+        setSubcategoryId(null);
         setSeenIds([]);
       }
     } catch {
@@ -151,9 +146,8 @@ export default function PlannerPage() {
                 onClick={() => {
                   const newId = Number(id);
                   setCategoryId(newId);
-                  setSubcategoryLabel('전체');
-                  setSubcategoryKeywords([]);
-                  handleFetchCandidates([], newId, '전체', []);
+                  setSubcategoryId(null);
+                  handleFetchCandidates([], newId, null);
                 }}
                 className={`px-3 py-2 rounded-xl text-sm font-semibold transition ${
                   categoryId === Number(id)
@@ -169,14 +163,13 @@ export default function PlannerPage() {
             <div className="flex flex-wrap gap-2 mt-3 pt-3 border-t border-gray-100">
               {SUBCATEGORIES[categoryId].map((sub) => (
                 <button
-                  key={sub.label}
+                  key={sub.id ?? 'all'}
                   onClick={() => {
-                    setSubcategoryLabel(sub.label);
-                    setSubcategoryKeywords(sub.keywords);
-                    handleFetchCandidates([], categoryId, sub.label, sub.keywords);
+                    setSubcategoryId(sub.id);
+                    handleFetchCandidates([], categoryId, sub.id);
                   }}
                   className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition ${
-                    subcategoryLabel === sub.label
+                    subcategoryId === sub.id
                       ? 'bg-gray-800 text-white'
                       : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                   }`}

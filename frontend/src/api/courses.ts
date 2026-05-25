@@ -41,7 +41,7 @@ export function getCandidates(
   sessionId: string,
   categoryId: number,
   extraExcludeIds: string[] = [],
-  subcategoryKeywords: string[] = [],
+  subcategoryId: number | null = null,
 ): Promise<CandidatesResponse> {
   return request<CandidatesResponse>(
     `/api/courses/session/${sessionId}/candidates`,
@@ -50,7 +50,7 @@ export function getCandidates(
       body: JSON.stringify({
         category_id: categoryId,
         extra_exclude_ids: extraExcludeIds,
-        subcategory_keywords: subcategoryKeywords,
+        subcategory_id: subcategoryId,
       }),
     },
   );
