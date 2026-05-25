@@ -21,6 +21,7 @@ class CreateSessionRequest(BaseModel):
 
 class CandidatesRequest(BaseModel):
     category_id: int
+    extra_exclude_ids: list[str] = []
 
 
 class PickRequest(BaseModel):

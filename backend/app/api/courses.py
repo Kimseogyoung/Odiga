@@ -44,7 +44,7 @@ async def get_candidates(session_id: str, req: CandidatesRequest):
     if not session:
         raise HTTPException(status_code=404, detail="세션이 없거나 만료되었습니다.")
 
-    exclude_ids = {s["kakao_place_id"] for s in session["selected"]}
+    exclude_ids = {s["kakao_place_id"] for s in session["selected"]} | set(req.extra_exclude_ids)
 
     prev_lat, prev_lng = None, None
     if session["selected"]:
