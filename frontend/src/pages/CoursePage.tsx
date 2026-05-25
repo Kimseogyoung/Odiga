@@ -1,0 +1,145 @@
+import { useState, useEffect } from 'react';
+import { useParams, Link } from 'react-router-dom';
+import { getCourse } from '../api/courses';
+import type { CourseResponse, CourseItem } from '../types';
+
+const CATEGORY_LABEL: Record<number, string> = {
+  1: '음식점',
+  2: '카페',
+  3: '쇼핑',
+  4: '바/펍',
+  5: '전시/문화',
+};
+
+const CATEGORY_EMOJI: Record<number, string> = {
+  1: '🍽',
+  2: '☕',
+  3: '🛍',
+  4: '🍺',
+  5: '🎨',
+};
+
+function TimelineItem({ item, isLast }: { item: CourseItem; isLast: boolean }) {
+  return (
+    <div className="flex gap-4">
+      {/* 타임라인 세로선 */}
+      <div className="flex flex-col items-center">
+        <div className="w-10 h-10 rounded-full bg-black text-white flex items-center justify-center text-lg shrink-0">
+          {CATEGORY_EMOJI[item.place.category_id] ?? '📍'}
+        </div>
+        {!isLast && <div className="w-0.5 flex-1 bg-gray-200 my-1" />}
+      </div>
+      {/* 내용 */}
+      <div className="flex-1 pb-6">
+        <div className="flex items-baseline gap-2">
+          <span className="text-sm font-bold text-gray-900">{item.scheduled_time}</span>
+          <span className="text-xs text-gray-400">
+            {CATEGORY_LABEL[item.place.category_id]} · {item.stay_minutes}분
+          </span>
+        </div>
+        <div className="mt-1 bg-white rounded-xl p-4 shadow-sm border border-gray-100">
+          <h3 className="font-bold text-gray-900">{item.place.name}</h3>
+          <p className="text-xs text-gray-500 mt-0.5 line-clamp-1">{item.place.address}</p>
+          {item.place.summary && (
+            <p className="text-sm text-gray-700 mt-2 line-clamp-2">{item.place.summary}</p>
+          )}
+          {item.place.kakao_url && (
+            <a
+              href={item.place.kakao_url}
+              target="_blank"
+              rel="noreferrer"
+              className="mt-2 inline-block text-xs text-blue-500 hover:underline"
+            >
+              카카오맵에서 보기
+            </a>
+          )}
+        </div>
+        {!isLast && (
+          <p className="text-xs text-gray-400 mt-2 pl-1">
+            도보 이동 약 {item.travel_time_to_next_minutes}분
+          </p>
+        )}
+      </div>
+    </div>
+  );
+}
+
+export default function CoursePage() {
+  const { shareToken } = useParams<{ shareToken: string }>();
+  const [course, setCourse] = useState<CourseResponse | null>(null);
+  const [error, setError] = useState('');
+  const [copied, setCopied] = useState(false);
+
+  useEffect(() => {
+    if (!shareToken) return;
+    getCourse(shareToken)
+      .then(setCourse)
+      .catch(() => setError('코스를 찾을 수 없습니다.'));
+  }, [shareToken]);
+
+  function handleCopy() {
+    navigator.clipboard.writeText(window.location.href).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    });
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center gap-4">
+        <p className="text-gray-500">{error}</p>
+        <Link to="/" className="text-sm text-blue-500 hover:underline">
+          처음으로 돌아가기
+        </Link>
+      </div>
+    );
+  }
+
+  if (!course) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <p className="text-gray-400">불러오는 중…</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-gray-50 flex flex-col items-center py-8 px-4">
+      <div className="w-full max-w-md flex flex-col gap-5">
+        {/* 헤더 */}
+        <div className="text-center">
+          <h1 className="text-2xl font-black text-gray-900">오늘의 코스</h1>
+          <p className="text-sm text-gray-500 mt-1">
+            {course.start_time} ~ {course.end_time} · {course.items.length}곳
+          </p>
+        </div>
+
+        {/* 공유 */}
+        <button
+          onClick={handleCopy}
+          className="w-full py-3 border-2 border-black text-black text-sm font-bold rounded-2xl hover:bg-black hover:text-white transition"
+        >
+          {copied ? '링크 복사됨!' : '공유 링크 복사'}
+        </button>
+
+        {/* 시간표 */}
+        <div className="pt-2">
+          {course.items.map((item, i) => (
+            <TimelineItem
+              key={item.place.kakao_place_id}
+              item={item}
+              isLast={i === course.items.length - 1}
+            />
+          ))}
+        </div>
+
+        <Link
+          to="/"
+          className="text-center text-sm text-gray-400 hover:text-gray-700 pb-4"
+        >
+          새 코스 만들기
+        </Link>
+      </div>
+    </div>
+  );
+}

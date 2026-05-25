@@ -4,7 +4,29 @@
 
 ---
 
-## 현재 마일스톤: M3 — 프론트엔드
+## 현재 마일스톤: M4 — 배포 / 고도화
+
+---
+
+## M3 완료 ✅
+
+### 프론트엔드 (React + TypeScript + Tailwind CSS v4)
+- [x] `frontend/src/types.ts` — 백엔드 스키마 대응 TypeScript 타입 전체 정의
+- [x] `frontend/src/api/courses.ts` — API 호출 레이어 (constants, session, candidates, pick, course)
+- [x] `frontend/src/pages/HomePage.tsx` — 지역/키워드/시간 입력 폼
+- [x] `frontend/src/pages/PlannerPage.tsx` — 슬롯별 카테고리 선택 + 장소 3개 카드 선택 UI
+- [x] `frontend/src/pages/CoursePage.tsx` — 시간표 결과 + 공유 링크 복사
+- [x] `frontend/src/components/PlaceCard.tsx` — 장소 카드 컴포넌트
+- [x] `frontend/src/App.tsx` — React Router 라우팅 (/, /planner/:sessionId, /course/:shareToken)
+
+### 아키텍처 결정사항 (M3)
+| 항목 | 결정 |
+|---|---|
+| 라우팅 | React Router v7 (`BrowserRouter`) |
+| 상태 전달 | `useNavigate` state로 session_id + slot 전달 |
+| 카테고리 기본값 | 하드코딩 fallback + `/api/constants`로 덮어쓰기 |
+| 사진 | `photo_url: null` → 카테고리별 이모지로 대체 |
+| 공유 | `navigator.clipboard.writeText(window.location.href)` |
 
 ---
 
