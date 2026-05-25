@@ -36,6 +36,54 @@ uvicorn backend.app.main:app --reload
 cd frontend && npm install && npm run dev
 ```
 
+## EC2 배포 (Amazon Linux)
+
+**1. Docker 설치**
+```bash
+sudo yum update -y
+sudo yum install -y docker
+sudo systemctl enable --now docker
+sudo usermod -aG docker $USER && newgrp docker
+
+sudo curl -L "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+sudo chmod +x /usr/local/bin/docker-compose
+```
+
+**2. 코드 받기**
+```bash
+git clone <repo-url> ~/Odiga && cd ~/Odiga
+```
+
+**3. 환경변수 파일 생성**
+
+`~/Odiga/.env`:
+```
+VITE_KAKAO_MAP_KEY=카카오키
+```
+
+`~/Odiga/backend/.env`:
+```
+REDIS_URL=redis://redis:6379
+ANTHROPIC_API_KEY=...
+NAVER_CLIENT_ID=...
+NAVER_CLIENT_SECRET=...
+KAKAO_API_KEY=...
+ALLOWED_ORIGINS=["http://odiga.sandbox.seogyoung.com"]
+```
+
+**4. 빌드 & 실행**
+```bash
+docker-compose up -d --build
+```
+
+**5. 상태 확인**
+```bash
+docker-compose ps
+docker-compose logs -f backend
+```
+
+> host nginx 세팅은 [SeogyoungNetComInfra](../SeogyoungNetComInfra) 레포의 `setup.sh` 참고.
+
 ## 데이터 파이프라인
 
 ```bash
