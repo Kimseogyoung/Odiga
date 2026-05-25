@@ -33,7 +33,8 @@ async def fetch_reviews(
     sem: asyncio.Semaphore,
     place_name: str,
     region_label: str,
-) -> str:
+) -> tuple[str, int]:
+    """블로그 리뷰 텍스트와 총 검색 결과 수(blog_count) 반환."""
     headers = {
         "X-Naver-Client-Id": settings.NAVER_CLIENT_ID,
         "X-Naver-Client-Secret": settings.NAVER_CLIENT_SECRET,
@@ -50,9 +51,10 @@ async def fetch_reviews(
         resp.raise_for_status()
         data = resp.json()
 
+    blog_count = data.get("total", 0)
     items = data.get("items", [])
     if not items:
-        return ""
+        return "", blog_count
 
     texts = []
     for item in items:
@@ -60,7 +62,7 @@ async def fetch_reviews(
         desc = _strip_html(item.get("description", ""))
         texts.append(f"{title}. {desc}")
 
-    return " ".join(texts)
+    return " ".join(texts), blog_count
 
 
 def _strip_html(text: str) -> str:
@@ -82,7 +84,7 @@ async def run(limit: int | None = None) -> None:
     total = len(places)
     done = 0
 
-    async def fetch_with_progress(place: dict) -> tuple[dict, str | Exception]:
+    async def fetch_with_progress(place: dict) -> tuple[dict, tuple[str, int] | Exception]:
         nonlocal done
         result = await fetch_reviews(client, sem, place["name"], place["region_label"])
         done += 1
@@ -98,15 +100,18 @@ async def run(limit: int | None = None) -> None:
     for outcome in outcomes:
         if isinstance(outcome, Exception):
             continue
-        place, reviews = outcome
-        if isinstance(reviews, Exception):
-            print(f"  실패: {place['name']} — {reviews}")
-            reviews = ""
+        place, result = outcome
+        if isinstance(result, Exception):
+            print(f"  실패: {place['name']} — {result}")
+            reviews, blog_count = "", 0
+        else:
+            reviews, blog_count = result
         results.append({
             "kakao_place_id": place["kakao_place_id"],
             "name": place["name"],
             "region_label": place["region_label"],
             "blog_reviews": reviews,
+            "blog_count":   blog_count,
         })
 
     data_str = json.dumps(results, ensure_ascii=False, indent=2)

@@ -13,6 +13,7 @@ from app.core.config import settings
 from app.core.constants import STAY_MINUTES
 from app.core.redis import get_redis
 from app.services import place_store
+from app.services.scorer import get_scorer
 
 
 # ── 인메모리 벡터 캐시 ────────────────────────────────────────────────────────
@@ -45,18 +46,9 @@ async def _get_vectors(
 
 # ── 내부 헬퍼 ─────────────────────────────────────────────────────────────────
 
-async def _enrich(kakao_place_id: str) -> PlaceCandidate | None:
-    """Redis에서 장소 상세 + AI 요약 병렬 조회 후 PlaceCandidate 조립."""
-    detail, summary_data = await asyncio.gather(
-        place_store.get_detail(kakao_place_id),
-        place_store.get_summary(kakao_place_id),
-    )
-    if not detail:
-        return None
-
+def _build_candidate(detail: dict, summary_data: dict | None) -> PlaceCandidate:
     summary = summary_data.get("summary", "") if summary_data else ""
     caution = summary_data.get("caution", "") if summary_data else ""
-
     return PlaceCandidate(
         kakao_place_id=detail["kakao_place_id"],
         name=detail["name"],
@@ -322,8 +314,10 @@ async def search_candidates(
     top_k: int = 3,
 ) -> list[PlaceCandidate]:
     """
-    keyword_ids 조합 쿼리 벡터 × region×category 벡터 행렬 → 코사인 유사도 → top_k 후보 반환.
-    Redis에 데이터 없으면 빈 리스트 반환.
+    1. 코사인 유사도 상위 pool 추출
+    2. detail 병렬 조회 → scorer로 재정렬 (blog_count 기반)
+    3. 재정렬된 pool에서 랜덤 top_k 추출
+    4. summary 병렬 조회 후 PlaceCandidate 조립
     """
     query_raw, vec_result = await asyncio.gather(
         place_store.get_keyword_vector(keyword_ids),
@@ -334,7 +328,27 @@ async def search_candidates(
 
     query_vec = np.array(query_raw, dtype=np.float32)
     ids, matrix = vec_result
-    top_ids = _cosine_top_k(query_vec, ids, matrix, exclude_ids, top_k)
+    pool_ids = _cosine_top_k(query_vec, ids, matrix, exclude_ids, _CANDIDATE_POOL_SIZE)
+    if not pool_ids:
+        return []
 
-    candidates = await asyncio.gather(*[_enrich(pid) for pid in top_ids])
-    return [c for c in candidates if c is not None]
+    # pool 전체 detail 병렬 조회 → scorer 재정렬
+    details = await asyncio.gather(*[place_store.get_detail(pid) for pid in pool_ids])
+    scorer = get_scorer()
+    scored = sorted(
+        [(detail, scorer.score(detail)) for detail in details if detail],
+        key=lambda x: -x[1],
+    )
+
+    # 재정렬된 pool에서 랜덤 top_k
+    picked_details = random.sample(
+        [d for d, _ in scored],
+        min(top_k, len(scored)),
+    )
+
+    # 선택된 장소의 summary만 병렬 조회
+    summaries = await asyncio.gather(*[
+        place_store.get_summary(d["kakao_place_id"]) for d in picked_details
+    ])
+
+    return [_build_candidate(d, s) for d, s in zip(picked_details, summaries)]

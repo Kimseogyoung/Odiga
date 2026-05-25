@@ -88,7 +88,10 @@ def merge_kakao_naver(twitter_data: list[dict]) -> tuple[list[dict], dict[str, l
     print(f"  네이버: {len(naver_data)}개 로드")
     print(f"  트위터: {sum(len(r.get('tweets',[])) for r in twitter_data)}개 트윗 로드")
 
-    naver_map: dict[str, str] = {r["kakao_place_id"]: r["blog_reviews"] for r in naver_data}
+    naver_map: dict[str, tuple[str, int]] = {
+        r["kakao_place_id"]: (r["blog_reviews"], r.get("blog_count", 0))
+        for r in naver_data
+    }
     region_tweets_map: dict[str, list[str]] = {
         r["region_label"]: r.get("tweets", []) for r in twitter_data
     }
@@ -101,9 +104,11 @@ def merge_kakao_naver(twitter_data: list[dict]) -> tuple[list[dict], dict[str, l
         if pid in seen_ids:
             continue
         seen_ids.add(pid)
+        blog_reviews, blog_count = naver_map.get(pid, ("", 0))
         places.append({
             **place,
-            "blog_reviews": naver_map.get(pid, ""),
+            "blog_reviews": blog_reviews,
+            "blog_count":   blog_count,
             "tweets":       [],
             "source":       "kakao",
         })
@@ -177,7 +182,7 @@ async def discover_new_places(
                 print(f"    - '{name}' → {place['name']} (이미 존재)")
                 continue
             existing_ids.add(place["kakao_place_id"])
-            new_places.append({**place, "blog_reviews": "", "tweets": [], "source": "twitter"})
+            new_places.append({**place, "blog_reviews": "", "blog_count": 0, "tweets": [], "source": "twitter"})
             print(f"    ✓ '{name}' → {place['name']} ({place['address']})")
 
     return new_places

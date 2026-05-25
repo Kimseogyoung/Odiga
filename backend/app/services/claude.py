@@ -1,3 +1,18 @@
+"""
+Claude Haiku를 활용한 장소 요약 및 키워드 태깅.
+
+[미구현] place별 AI 요약 데이터 생성 파이프라인
+  - 구현 위치: scripts/commands/summarize_places.py (신규 작성 필요)
+  - 실행 시점: embed_places.py 실행 후 (Redis에 places:detail 저장된 후)
+  - 로직:
+      merged_places.json 읽기
+      → place_store.summary_exists(pid) 로 이미 있는 것 skip
+      → summarize_place() + tag_keywords() 병렬 호출 (asyncio.Semaphore(10))
+      → place_store.save_summary(pid, result) 저장
+  - 비용: Claude Haiku 기준 1622개 약 $1.14 (1회)
+  - TTL: 제거 권장 (장소 데이터는 파이프라인 실행 시에만 변경됨)
+  - 현재 상태: Redis에 ai:summary 없음 → PlaceCandidate.summary = ""
+"""
 import json
 import anthropic
 from app.core.config import settings
