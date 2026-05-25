@@ -4,7 +4,30 @@
 
 ---
 
-## 현재 마일스톤: M2 — 플래너 API
+## 현재 마일스톤: M3 — 프론트엔드
+
+---
+
+## M2 완료 ✅
+
+### 플래너 API
+- [x] `backend/app/api/schemas.py` — 요청/응답 Pydantic 모델
+- [x] `backend/app/services/planner.py` — 벡터 검색, 세션 CRUD, 슬롯 계산, 코스 완성
+- [x] `backend/app/api/courses.py` — FastAPI 라우터 4개 엔드포인트
+- [x] `backend/app/core/config.py` — .env 경로 수정, SESSION_TTL_SECONDS 추가
+- [x] `backend/app/main.py` — 라우터 등록
+- [x] `run.py` — 어느 경로에서든 서버 실행 가능한 진입점
+- [x] `test_api.py` — 전체 플로우 통합 테스트 스크립트
+
+### 아키텍처 결정사항 (M2)
+| 항목 | 결정 |
+|---|---|
+| API 방식 | 세션 기반 (Redis TTL 30분) |
+| 후보 선정 | 유사도 상위 15개 풀에서 랜덤 3개 |
+| 카테고리 선택 | 사용자가 직접 선택 (자동 결정 아님) |
+| 이동시간 | Haversine 공식 (네이버 API 연동 전) |
+| 벡터 캐시 | 서버 인메모리 TTL 1일 (JSON 파싱 비용 제거) |
+| 코스 저장 | Redis TTL 7일, share_token 8자리 |
 
 ---
 
@@ -100,10 +123,11 @@ Claude Haiku로 하루 코스 생성
 - `backend/app/services/planner.py` — 검색 + 슬롯 계산 로직
 - `backend/app/main.py`에 라우터 등록
 
-### 3. 프론트엔드 (M3)
+### 3. 프론트엔드 (M3) ← 다음 마일스톤
 - React 입력 폼 (지역 + 키워드 + 시작/종료 시간)
 - 시간대별 카테고리 선택 + 장소 3개 선택 UI (모드 B)
 - 코스 시간표 결과 UI
+- 공유 링크 페이지
 
 ---
 
@@ -133,9 +157,12 @@ backend/
       redis.py        ✅ PrefixedRedis 래퍼
     services/
       place_store.py  ✅
-      claude.py       ✅ (M2에서 수정 예정)
-    api/              ⬜ M2에서 작성
-  main.py             ✅ (라우터 미등록)
+      claude.py       ✅
+      planner.py      ✅
+    api/
+      courses.py      ✅
+      schemas.py      ✅
+  main.py             ✅
 
 scripts/
   pipeline.py         ✅ Click CLI
