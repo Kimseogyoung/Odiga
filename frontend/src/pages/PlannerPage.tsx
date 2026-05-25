@@ -24,6 +24,7 @@ export default function PlannerPage() {
   const [picking, setPicking] = useState(false);
   const [error, setError] = useState('');
   const [refreshCooldown, setRefreshCooldown] = useState(0);
+  const [seenIds, setSeenIds] = useState<string[]>([]);
   const [constants, setConstants] = useState<Constants | null>(null);
 
   useEffect(() => {
@@ -32,17 +33,18 @@ export default function PlannerPage() {
 
   const categories = constants?.categories ?? CATEGORY_LABEL;
 
-  async function handleFetchCandidates() {
+  async function handleFetchCandidates(extraExcludeIds: string[] = []) {
     if (!sessionId) return;
     setError('');
     setLoadingCandidates(true);
     setCandidates([]);
     try {
-      const res = await getCandidates(sessionId, categoryId);
+      const res = await getCandidates(sessionId, categoryId, extraExcludeIds);
       if (res.candidates.length === 0) {
         setError('후보 장소가 없습니다. 다른 카테고리를 선택해 보세요.');
       }
       setCandidates(res.candidates);
+      setSeenIds((prev) => [...prev, ...res.candidates.map((c) => c.kakao_place_id)]);
     } catch {
       setError('후보 장소를 불러오지 못했습니다.');
     } finally {
@@ -59,7 +61,7 @@ export default function PlannerPage() {
         return prev - 1;
       });
     }, 1000);
-    await handleFetchCandidates();
+    await handleFetchCandidates(seenIds);
   }
 
   async function handlePick(place: PlaceCandidate) {
@@ -74,6 +76,7 @@ export default function PlannerPage() {
         setSlot(res.slot);
         setCandidates([]);
         setCategoryId(1);
+        setSeenIds([]);
       }
     } catch {
       setError('선택 처리 중 오류가 발생했습니다.');
@@ -123,6 +126,7 @@ export default function PlannerPage() {
                 onClick={() => {
                   setCategoryId(Number(id));
                   setCandidates([]);
+                  setSeenIds([]);
                 }}
                 className={`px-3 py-2 rounded-xl text-sm font-semibold transition ${
                   categoryId === Number(id)
@@ -135,7 +139,7 @@ export default function PlannerPage() {
             ))}
           </div>
           <button
-            onClick={handleFetchCandidates}
+            onClick={() => handleFetchCandidates()}
             disabled={loadingCandidates}
             className="w-full py-3 bg-gray-900 text-white text-sm font-bold rounded-xl hover:bg-gray-700 active:scale-95 transition disabled:opacity-50"
           >
