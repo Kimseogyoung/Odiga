@@ -1,7 +1,7 @@
 from pathlib import Path
 from pydantic_settings import BaseSettings
 
-_ENV_PATH = Path(__file__).parent.parent.parent.parent / ".env"
+_ENV_PATH = Path(__file__).parent.parent.parent / ".env"
 
 
 class Settings(BaseSettings):
@@ -23,10 +23,13 @@ class Settings(BaseSettings):
     TWITTER_AUTH_TOKEN: str = ""
     TWITTER_CT0: str = ""
 
+    # Session
+    SESSION_TTL_SECONDS: int = 1800  # 30분
+
     # CORS
     ALLOWED_ORIGINS: list[str] = ["http://localhost:5173"]
 
-    model_config = {"env_file": str(_ENV_PATH)}
+    model_config = {"env_file": str(_ENV_PATH), "extra": "ignore"}
 
 
 settings = Settings()

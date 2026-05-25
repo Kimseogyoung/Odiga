@@ -2,6 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.core.config import settings
 from app.core.redis import init_redis, close_redis
+from app.api.courses import router as courses_router
 
 app = FastAPI(title="Odiga API")
 
@@ -22,6 +23,9 @@ async def startup():
 @app.on_event("shutdown")
 async def shutdown():
     await close_redis()
+
+
+app.include_router(courses_router)
 
 
 @app.get("/health")
