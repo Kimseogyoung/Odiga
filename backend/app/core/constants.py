@@ -108,10 +108,12 @@ KAKAO_CATEGORY_MAP: dict[str, int] = {
     "호프": PlaceCategory.BAR,
     "바": PlaceCategory.BAR,
     "문화시설": PlaceCategory.CULTURE,
+    "문화,예술": PlaceCategory.CULTURE,
     "전시": PlaceCategory.CULTURE,
     "갤러리": PlaceCategory.CULTURE,
     "쇼핑": PlaceCategory.SHOPPING,
     "의류": PlaceCategory.SHOPPING,
+    "가정,생활": PlaceCategory.SHOPPING,
     "음식점": PlaceCategory.RESTAURANT,
 }
 
