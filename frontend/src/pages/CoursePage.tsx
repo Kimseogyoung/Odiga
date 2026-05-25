@@ -4,15 +4,32 @@ import { getCourse } from '../api/courses';
 import { CATEGORY_LABEL, CATEGORY_EMOJI, CATEGORY_EMOJI_FALLBACK } from '../constants';
 import type { CourseResponse, CourseItem } from '../types';
 
+const KAKAO_MAP_KEY = import.meta.env.VITE_KAKAO_MAP_KEY as string;
+
+function loadKakaoSDK(): Promise<void> {
+  return new Promise((resolve, reject) => {
+    if (window.kakao?.maps) {
+      window.kakao.maps.load(resolve);
+      return;
+    }
+    const script = document.createElement('script');
+    script.src = `//dapi.kakao.com/v2/maps/sdk.js?appkey=${KAKAO_MAP_KEY}&autoload=false`;
+    script.onload = () => window.kakao.maps.load(resolve);
+    script.onerror = reject;
+    document.head.appendChild(script);
+  });
+}
+
 function KakaoMap({ items }: { items: CourseItem[] }) {
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!containerRef.current || items.length === 0) return;
 
-    window.kakao.maps.load(() => {
+    loadKakaoSDK().then(() => {
+      if (!containerRef.current) return;
       const center = new window.kakao.maps.LatLng(items[0].place.lat, items[0].place.lng);
-      const map = new window.kakao.maps.Map(containerRef.current!, { center, level: 5 });
+      const map = new window.kakao.maps.Map(containerRef.current, { center, level: 5 });
       const bounds = new window.kakao.maps.LatLngBounds();
 
       items.forEach((item, i) => {
@@ -33,6 +50,8 @@ function KakaoMap({ items }: { items: CourseItem[] }) {
       });
 
       map.setBounds(bounds);
+    }).catch(() => {
+      console.error('[KakaoMap] SDK 로드 실패');
     });
   }, [items]);
 
