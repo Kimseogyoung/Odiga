@@ -41,12 +41,17 @@ export function getCandidates(
   sessionId: string,
   categoryId: number,
   extraExcludeIds: string[] = [],
+  subcategoryKeywords: string[] = [],
 ): Promise<CandidatesResponse> {
   return request<CandidatesResponse>(
     `/api/courses/session/${sessionId}/candidates`,
     {
       method: 'POST',
-      body: JSON.stringify({ category_id: categoryId, extra_exclude_ids: extraExcludeIds }),
+      body: JSON.stringify({
+        category_id: categoryId,
+        extra_exclude_ids: extraExcludeIds,
+        subcategory_keywords: subcategoryKeywords,
+      }),
     },
   );
 }

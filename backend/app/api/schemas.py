@@ -22,6 +22,7 @@ class CreateSessionRequest(BaseModel):
 class CandidatesRequest(BaseModel):
     category_id: int
     extra_exclude_ids: list[str] = []
+    subcategory_keywords: list[str] = []  # 빈 리스트 = 전체
 
 
 class PickRequest(BaseModel):

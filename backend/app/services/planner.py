@@ -318,6 +318,7 @@ async def search_candidates(
     top_k: int = 3,
     prev_lat: float | None = None,
     prev_lng: float | None = None,
+    subcategory_keywords: list[str] | None = None,
 ) -> list[PlaceCandidate]:
     """
     1. 코사인 유사도 상위 pool 추출
@@ -338,8 +339,15 @@ async def search_candidates(
     if not pool_ids:
         return []
 
-    # pool 전체 detail 병렬 조회 → scorer 재정렬
+    # pool 전체 detail 병렬 조회 → 세부 카테고리 필터 → scorer 재정렬
     details = await asyncio.gather(*[place_store.get_detail(pid) for pid in pool_ids])
+
+    if subcategory_keywords:
+        details = [
+            d for d in details
+            if d and any(kw in d.get("kakao_category", "") for kw in subcategory_keywords)
+        ]
+
     scorer = get_scorer()
     scored = sorted(
         [(detail, scorer.score(detail)) for detail in details if detail],

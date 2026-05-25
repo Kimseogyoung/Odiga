@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useParams, useLocation, useNavigate } from 'react-router-dom';
 import { getCandidates, pickPlace, getConstants } from '../api/courses';
 import PlaceCard from '../components/PlaceCard';
-import { CATEGORY_LABEL } from '../constants';
+import { CATEGORY_LABEL, SUBCATEGORIES } from '../constants';
 import type { PlaceCandidate, SlotInfo, Constants } from '../types';
 
 interface LocationState {
@@ -19,14 +19,17 @@ export default function PlannerPage() {
   const [slot, setSlot] = useState<SlotInfo | null>(state?.slot ?? null);
   const [totalSlots] = useState(state?.total_slots ?? 1);
   const [categoryId, setCategoryId] = useState<number | null>(null);
-  const [candidateCache, setCandidateCache] = useState<Record<number, PlaceCandidate[]>>({});
+  const [subcategoryLabel, setSubcategoryLabel] = useState<string>('전체');
+  const [subcategoryKeywords, setSubcategoryKeywords] = useState<string[]>([]);
+  const [candidateCache, setCandidateCache] = useState<Record<string, PlaceCandidate[]>>({});
   const [loadingCandidates, setLoadingCandidates] = useState(false);
   const [picking, setPicking] = useState(false);
   const [error, setError] = useState('');
   const [refreshCooldown, setRefreshCooldown] = useState(0);
   const [seenIds, setSeenIds] = useState<string[]>([]);
 
-  const candidates = categoryId !== null ? (candidateCache[categoryId] ?? []) : [];
+  const cacheKey = categoryId !== null ? `${categoryId}_${subcategoryLabel}` : '';
+  const candidates = cacheKey ? (candidateCache[cacheKey] ?? []) : [];
   const [constants, setConstants] = useState<Constants | null>(null);
 
   useEffect(() => {
@@ -35,25 +38,35 @@ export default function PlannerPage() {
 
   const categories = constants?.categories ?? CATEGORY_LABEL;
 
-  async function handleFetchCandidates(extraExcludeIds: string[] = [], catId?: number) {
+  async function handleFetchCandidates(
+    extraExcludeIds: string[] = [],
+    catId?: number,
+    subLabel?: string,
+    subKeywords?: string[],
+  ) {
     if (!sessionId) return;
     const targetCatId = catId ?? categoryId;
     if (targetCatId === null) return;
+    const targetSubLabel = subLabel ?? subcategoryLabel;
+    const targetSubKeywords = subKeywords ?? subcategoryKeywords;
+    const key = `${targetCatId}_${targetSubLabel}`;
 
-    // 캐시 히트: 새로고침 요청(extraExcludeIds 있음)이 아니면 캐시 반환
-    if (extraExcludeIds.length === 0 && (candidateCache[targetCatId]?.length ?? 0) > 0) {
+    // 캐시 히트: 새로고침 요청이 아니면 즉시 반환
+    if (extraExcludeIds.length === 0 && (candidateCache[key]?.length ?? 0) > 0) {
       setCategoryId(targetCatId);
+      setSubcategoryLabel(targetSubLabel);
+      setSubcategoryKeywords(targetSubKeywords);
       return;
     }
 
     setError('');
     setLoadingCandidates(true);
     try {
-      const res = await getCandidates(sessionId, targetCatId, extraExcludeIds);
+      const res = await getCandidates(sessionId, targetCatId, extraExcludeIds, targetSubKeywords);
       if (res.candidates.length === 0) {
-        setError('후보 장소가 없습니다. 다른 카테고리를 선택해 보세요.');
+        setError('해당 조건의 장소가 없습니다. 다른 항목을 선택해 보세요.');
       }
-      setCandidateCache((prev) => ({ ...prev, [targetCatId]: res.candidates }));
+      setCandidateCache((prev) => ({ ...prev, [key]: res.candidates }));
       setSeenIds((prev) => [...prev, ...res.candidates.map((c) => c.kakao_place_id)]);
     } catch {
       setError('후보 장소를 불러오지 못했습니다.');
@@ -71,7 +84,7 @@ export default function PlannerPage() {
         return prev - 1;
       });
     }, 1000);
-    await handleFetchCandidates(seenIds);
+    await handleFetchCandidates(seenIds, undefined, subcategoryLabel, subcategoryKeywords);
   }
 
   async function handlePick(place: PlaceCandidate) {
@@ -86,6 +99,8 @@ export default function PlannerPage() {
         setSlot(res.slot);
         setCandidateCache({});
         setCategoryId(null);
+        setSubcategoryLabel('전체');
+        setSubcategoryKeywords([]);
         setSeenIds([]);
       }
     } catch {
@@ -136,7 +151,9 @@ export default function PlannerPage() {
                 onClick={() => {
                   const newId = Number(id);
                   setCategoryId(newId);
-                  handleFetchCandidates([], newId);
+                  setSubcategoryLabel('전체');
+                  setSubcategoryKeywords([]);
+                  handleFetchCandidates([], newId, '전체', []);
                 }}
                 className={`px-3 py-2 rounded-xl text-sm font-semibold transition ${
                   categoryId === Number(id)
@@ -148,6 +165,27 @@ export default function PlannerPage() {
               </button>
             ))}
           </div>
+          {categoryId !== null && (SUBCATEGORIES[categoryId]?.length ?? 0) > 1 && (
+            <div className="flex flex-wrap gap-2 mt-3 pt-3 border-t border-gray-100">
+              {SUBCATEGORIES[categoryId].map((sub) => (
+                <button
+                  key={sub.label}
+                  onClick={() => {
+                    setSubcategoryLabel(sub.label);
+                    setSubcategoryKeywords(sub.keywords);
+                    handleFetchCandidates([], categoryId, sub.label, sub.keywords);
+                  }}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition ${
+                    subcategoryLabel === sub.label
+                      ? 'bg-gray-800 text-white'
+                      : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                  }`}
+                >
+                  {sub.label}
+                </button>
+              ))}
+            </div>
+          )}
           {loadingCandidates && (
             <p className="text-center text-sm text-gray-400 mt-1">검색 중…</p>
           )}

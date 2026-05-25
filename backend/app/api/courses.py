@@ -59,6 +59,7 @@ async def get_candidates(session_id: str, req: CandidatesRequest):
         exclude_ids=exclude_ids,
         prev_lat=prev_lat,
         prev_lng=prev_lng,
+        subcategory_keywords=req.subcategory_keywords,
     )
     if not candidates:
         raise HTTPException(status_code=503, detail="해당 조건의 장소 데이터가 없습니다.")
