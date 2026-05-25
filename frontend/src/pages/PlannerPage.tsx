@@ -2,15 +2,8 @@ import { useState, useEffect } from 'react';
 import { useParams, useLocation, useNavigate } from 'react-router-dom';
 import { getCandidates, pickPlace, getConstants } from '../api/courses';
 import PlaceCard from '../components/PlaceCard';
+import { CATEGORY_LABEL } from '../constants';
 import type { PlaceCandidate, SlotInfo, Constants } from '../types';
-
-const DEFAULT_CATEGORIES: Record<number, string> = {
-  1: '음식점',
-  2: '카페',
-  3: '쇼핑',
-  4: '바/펍',
-  5: '전시/문화',
-};
 
 interface LocationState {
   total_slots: number;
@@ -36,7 +29,7 @@ export default function PlannerPage() {
     getConstants().then(setConstants).catch(() => {});
   }, []);
 
-  const categories = constants?.categories ?? DEFAULT_CATEGORIES;
+  const categories = constants?.categories ?? CATEGORY_LABEL;
 
   async function handleFetchCandidates() {
     if (!sessionId) return;

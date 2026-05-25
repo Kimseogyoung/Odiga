@@ -1,12 +1,5 @@
+import { CATEGORY_EMOJI, CATEGORY_EMOJI_FALLBACK } from '../constants';
 import type { PlaceCandidate } from '../types';
-
-const CATEGORY_EMOJI: Record<number, string> = {
-  1: '🍽',
-  2: '☕',
-  3: '🛍',
-  4: '🍺',
-  5: '🎨',
-};
 
 interface Props {
   place: PlaceCandidate;
@@ -18,7 +11,7 @@ export default function PlaceCard({ place, onSelect, disabled }: Props) {
   return (
     <div className="bg-white rounded-2xl shadow-md overflow-hidden border border-gray-100">
       <div className="h-36 bg-gray-100 flex items-center justify-center text-5xl">
-        {CATEGORY_EMOJI[place.category_id] ?? '📍'}
+        {CATEGORY_EMOJI[place.category_id] ?? CATEGORY_EMOJI_FALLBACK}
       </div>
       <div className="p-4 flex flex-col gap-2">
         <h3 className="font-bold text-gray-900 text-base leading-tight">{place.name}</h3>

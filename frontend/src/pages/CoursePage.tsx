@@ -1,23 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { getCourse } from '../api/courses';
+import { CATEGORY_LABEL, CATEGORY_EMOJI, CATEGORY_EMOJI_FALLBACK } from '../constants';
 import type { CourseResponse, CourseItem } from '../types';
-
-const CATEGORY_LABEL: Record<number, string> = {
-  1: '음식점',
-  2: '카페',
-  3: '쇼핑',
-  4: '바/펍',
-  5: '전시/문화',
-};
-
-const CATEGORY_EMOJI: Record<number, string> = {
-  1: '🍽',
-  2: '☕',
-  3: '🛍',
-  4: '🍺',
-  5: '🎨',
-};
 
 function TimelineItem({ item, isLast }: { item: CourseItem; isLast: boolean }) {
   return (
@@ -25,7 +10,7 @@ function TimelineItem({ item, isLast }: { item: CourseItem; isLast: boolean }) {
       {/* 타임라인 세로선 */}
       <div className="flex flex-col items-center">
         <div className="w-10 h-10 rounded-full bg-black text-white flex items-center justify-center text-lg shrink-0">
-          {CATEGORY_EMOJI[item.place.category_id] ?? '📍'}
+          {CATEGORY_EMOJI[item.place.category_id] ?? CATEGORY_EMOJI_FALLBACK}
         </div>
         {!isLast && <div className="w-0.5 flex-1 bg-gray-200 my-1" />}
       </div>
