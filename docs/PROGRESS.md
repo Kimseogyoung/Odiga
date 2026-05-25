@@ -8,6 +8,34 @@
 
 ---
 
+## M4 진행 중 🔧
+
+### 배포 인프라
+- [x] `backend/Dockerfile` — FastAPI 서버 컨테이너 (포트 11000)
+- [x] `frontend/Dockerfile` — React 빌드 + nginx 서빙 (포트 12000)
+- [x] `docker-compose.yml` — backend/frontend, host 네트워크 모드
+- [x] `scripts/Dockerfile` — 파이프라인 전용 이미지 (sentence-transformers 포함)
+- [x] `scripts/jenkins/Jenkinsfile` — REDIS_URL 파라미터로 로컬/원격 대상 선택
+- [x] Redis 독립 컨테이너 분리 (`docker run` 직접 실행, 볼륨 별도 관리)
+- [x] EC2 (Amazon Linux, t4g) 배포 완료 — `http://odiga.sandbox.seogyoung.com`
+- [x] host nginx (SeogyoungNetComInfra) — 서브도메인 라우팅 (80포트)
+  - `odiga.sandbox.seogyoung.com` → 12000 (frontend)
+  - `odiga-server.sandbox.seogyoung.com` → 11000 (backend)
+- [x] Jenkins 원격 Redis 배포 옵션 추가 (REDIS_URL 파라미터)
+
+### 기능 고도화
+- [x] 서브카테고리 int ID 도입 (101=한식, 201=베이커리 등)
+- [x] 서브카테고리 pre-indexing — Redis에 ID 목록 저장, 필터링 성능 개선
+- [x] 장소 사진 수집 — `collect-kakao` 단계에서 og:image 스크래핑
+- [x] PlaceCard / CoursePage 타임라인에 사진 썸네일 노출
+
+### 남은 작업
+- [ ] HTTPS 전환 (Let's Encrypt + certbot)
+- [ ] `frontend/.env` EC2에 생성 (VITE_KAKAO_MAP_KEY)
+- [ ] Jenkins `EC2_REDIS_URL` credential 등록 후 원격 파이프라인 1회 실행
+
+---
+
 ## M3 완료 ✅
 
 ### 프론트엔드 (React + TypeScript + Tailwind CSS v4)
@@ -25,7 +53,7 @@
 | 라우팅 | React Router v7 (`BrowserRouter`) |
 | 상태 전달 | `useNavigate` state로 session_id + slot 전달 |
 | 카테고리 기본값 | 하드코딩 fallback + `/api/constants`로 덮어쓰기 |
-| 사진 | `photo_url: null` → 카테고리별 이모지로 대체 |
+| 사진 | `photo_url` 있으면 노출, 없으면 카테고리별 이모지 |
 | 공유 | `navigator.clipboard.writeText(window.location.href)` |
 
 ---
@@ -56,13 +84,13 @@
 ## M1 완료 ✅
 
 ### 데이터 수집
-- [x] `scripts/commands/collect_kakao.py` — 격자 분할 수집 (1622개)
+- [x] `scripts/commands/collect_kakao.py` — 격자 분할 수집 (1622개) + og:image 스크래핑
 - [x] `scripts/commands/collect_naver.py` — 블로그 리뷰 수집
 - [x] `scripts/commands/collect_twitter.py` — Playwright 쿠키 인증 (수동)
 
 ### 데이터 파이프라인
 - [x] `scripts/commands/merge_places.py` — 카카오+네이버 병합, Claude로 트윗 장소 추출
-- [x] `scripts/commands/embed_places.py` — ko-sroberta 벡터 생성 + Redis 저장
+- [x] `scripts/commands/embed_places.py` — ko-sroberta 벡터 생성 + Redis 저장 + 서브카테고리 pre-indexing
 - [x] `scripts/commands/embed_search_keywords.py` — 키워드 조합 4943개 벡터 생성 + Redis 저장
 
 ### 인프라
@@ -79,82 +107,24 @@
 
 ## 아키텍처 결정사항
 
+### 배포 구조
+| 컴포넌트 | 방식 | 포트 |
+|---|---|---|
+| Redis | 독립 docker run (볼륨: redis_data) | 6379 |
+| Backend | docker-compose, host 네트워크 | 11000 |
+| Frontend | docker-compose, nginx 컨테이너 | 12000 |
+| host nginx | 직접 설치 (SeogyoungNetComInfra) | 80 |
+
 ### Redis 저장 구조
 | 키 | 내용 |
 |---|---|
-| `odiga:places:detail:{pid}` | 장소 메타 |
+| `odiga:places:detail:{pid}` | 장소 메타 (photo_url 포함) |
 | `odiga:places:vectors:{region_id}:{category_id}:ids` | 지역×카테고리 장소 ID 목록 |
 | `odiga:places:vectors:{region_id}:{category_id}:matrix` | 벡터 flatten 배열 |
+| `odiga:places:vectors:{region_id}:{category_id}:{sub_id}:ids` | 서브카테고리별 ID 목록 |
 | `odiga:query:keyword:{sorted_ids}` | 키워드 조합 쿼리 벡터 |
-| `odiga:ai:summary:{pid}` | AI 요약 (M2) |
 
-### M2 검색 흐름
-```
-keyword_ids → query:keyword:{ids} 로드
-region_id + category_id → places:vectors:{r}:{c} 로드 (~100개)
-numpy cosine similarity → top 20
-Claude Haiku로 하루 코스 생성
-```
-
----
-
-## 다음 할 일 (M2)
-
-### 서비스 모드
-- **모드 B (기본/무료)**: 시간대별 장소 선택지 3개 제시 → 사용자가 직접 선택하며 코스 완성
-- **모드 A (유료)**: Claude Haiku가 한 번에 최적 코스 자동 생성
-
-### 서비스 모드 확정
-- **모드 B (기본/무료)**: 시간대별 장소 선택지 3개 제시 → 사용자가 직접 선택하며 코스 완성
-- **모드 A (유료)**: Claude Haiku가 한 번에 최적 코스 자동 생성
-
-### 1. 플래너 API 엔드포인트 (모드 B 기준)
-
-**`POST /api/plan/init`**
-- 입력: `region_id`, `keyword_ids`, `start_time`, `end_time`
-- 출력: 예상 슬롯 수, 첫 슬롯 시작 시간
-- 슬롯 수 계산: `(end_time - start_time) ÷ 평균 90분`
-
-**`POST /api/plan/candidates`** (슬롯마다 반복)
-- 입력: `region_id`, `keyword_ids`, `category_id`(사용자 선택), `current_time`, `selected_place_ids`
-- 출력: 후보 장소 3개, 다음 슬롯 예상 시간, 남은 시간
-- 로직: Redis 벡터 검색 → 이미 선택된 장소 제외 → top 3 반환
-- Claude 호출 없음
-
-**`POST /api/plan/finalize`**
-- 입력: `selected_place_ids` (순서대로)
-- 출력: 이동시간 포함 시간표 JSON
-- 이동시간: 네이버 지도 API 연동 전까지 기본값 15분
-
-**`POST /api/plan/auto`** (유료)
-- Claude Haiku로 자동 코스 생성
-
-### 슬롯 체류시간 (constants.py 기준)
-| 카테고리 | 체류시간 |
-|---|---|
-| 음식점 | 60분 |
-| 카페 | 90분 |
-| 쇼핑 | 60분 |
-| 바/펍 | 90분 |
-| 전시/문화 | 90분 |
-
-이동시간 기본값: 15분 (네이버 지도 API 연동 전)
-
-### 2. FastAPI 라우터 연결
-- `backend/app/api/plan.py` 작성
-- `backend/app/services/planner.py` — 검색 + 슬롯 계산 로직
-- `backend/app/main.py`에 라우터 등록
-
-### 3. 프론트엔드 (M3) ← 다음 마일스톤
-- React 입력 폼 (지역 + 키워드 + 시작/종료 시간)
-- 시간대별 카테고리 선택 + 장소 3개 선택 UI (모드 B)
-- 코스 시간표 결과 UI
-- 공유 링크 페이지
-
----
-
-## 결정 사항
-
+### 결정 사항
 | 항목 | 결정 |
 |------|------|
 | Google Places API | 스킵 — 비용 문제 |
@@ -162,48 +132,7 @@ Claude Haiku로 하루 코스 생성
 | 임베딩 모델 | 로컬 ko-sroberta (무료, 768차원) |
 | 벡터 DB | Redis (MVP) → Aurora pgvector (고도화) |
 | 키워드 검색 | 조합 전체 사전 임베딩 (4943개) |
-| 지역×카테고리 | 벡터 DB 분리 저장 (~100개씩 로드) |
 | Redis prefix | `odiga:` — PrefixedRedis 래퍼 자동 처리 |
-| 파이프라인 트리거 | Jenkins (Docker) + GitHub 연동 |
-
----
-
-## 파일 구조 현황
-
-```
-backend/
-  app/
-    core/
-      config.py       ✅
-      constants.py    ✅
-      redis.py        ✅ PrefixedRedis 래퍼
-    services/
-      place_store.py  ✅
-      claude.py       ✅
-      planner.py      ✅
-    api/
-      courses.py      ✅
-      schemas.py      ✅
-  main.py             ✅
-
-scripts/
-  pipeline.py         ✅ Click CLI
-  commands/
-    collect_kakao.py  ✅
-    collect_naver.py  ✅
-    collect_twitter.py ✅
-    merge_places.py   ✅
-    embed_places.py   ✅
-    embed_search_keywords.py ✅
-  jenkins/
-    Jenkinsfile       ✅
-    run_pipeline.sh   ✅
-    run_pipeline.ps1  ✅
-
-data/
-  collected_kakao.json  ✅
-  collected_naver.json  ✅
-  collected_twitter.json ✅
-  merged_places.json    ✅
-  place_vectors.json    ✅
-```
+| 파이프라인 트리거 | Jenkins (Docker) + GitHub 연동, REDIS_URL 파라미터로 대상 선택 |
+| 사진 수집 | collect-kakao 단계에서 og:image 스크래핑 |
+| 서브카테고리 | int ID (category_id * 100 + seq), Redis pre-indexing |
