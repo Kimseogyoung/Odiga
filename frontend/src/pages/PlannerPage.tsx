@@ -19,12 +19,14 @@ export default function PlannerPage() {
   const [slot, setSlot] = useState<SlotInfo | null>(state?.slot ?? null);
   const [totalSlots] = useState(state?.total_slots ?? 1);
   const [categoryId, setCategoryId] = useState<number>(1);
-  const [candidates, setCandidates] = useState<PlaceCandidate[]>([]);
+  const [candidateCache, setCandidateCache] = useState<Record<number, PlaceCandidate[]>>({});
   const [loadingCandidates, setLoadingCandidates] = useState(false);
   const [picking, setPicking] = useState(false);
   const [error, setError] = useState('');
   const [refreshCooldown, setRefreshCooldown] = useState(0);
   const [seenIds, setSeenIds] = useState<string[]>([]);
+
+  const candidates = candidateCache[categoryId] ?? [];
   const [constants, setConstants] = useState<Constants | null>(null);
 
   useEffect(() => {
@@ -35,15 +37,22 @@ export default function PlannerPage() {
 
   async function handleFetchCandidates(extraExcludeIds: string[] = [], catId?: number) {
     if (!sessionId) return;
+    const targetCatId = catId ?? categoryId;
+
+    // 캐시 히트: 새로고침 요청(extraExcludeIds 있음)이 아니면 캐시 반환
+    if (extraExcludeIds.length === 0 && candidateCache[targetCatId]?.length > 0) {
+      setCategoryId(targetCatId);
+      return;
+    }
+
     setError('');
     setLoadingCandidates(true);
-    setCandidates([]);
     try {
-      const res = await getCandidates(sessionId, catId ?? categoryId, extraExcludeIds);
+      const res = await getCandidates(sessionId, targetCatId, extraExcludeIds);
       if (res.candidates.length === 0) {
         setError('후보 장소가 없습니다. 다른 카테고리를 선택해 보세요.');
       }
-      setCandidates(res.candidates);
+      setCandidateCache((prev) => ({ ...prev, [targetCatId]: res.candidates }));
       setSeenIds((prev) => [...prev, ...res.candidates.map((c) => c.kakao_place_id)]);
     } catch {
       setError('후보 장소를 불러오지 못했습니다.');
@@ -74,7 +83,7 @@ export default function PlannerPage() {
         navigate(`/course/${res.share_token}`);
       } else if (!res.done && res.slot) {
         setSlot(res.slot);
-        setCandidates([]);
+        setCandidateCache({});
         setCategoryId(1);
         setSeenIds([]);
       }
@@ -126,8 +135,6 @@ export default function PlannerPage() {
                 onClick={() => {
                   const newId = Number(id);
                   setCategoryId(newId);
-                  setCandidates([]);
-                  setSeenIds([]);
                   handleFetchCandidates([], newId);
                 }}
                 className={`px-3 py-2 rounded-xl text-sm font-semibold transition ${
