@@ -49,6 +49,7 @@ async def _get_vectors(
 def _build_candidate(detail: dict, summary_data: dict | None) -> PlaceCandidate:
     summary = summary_data.get("summary", "") if summary_data else ""
     caution = summary_data.get("caution", "") if summary_data else ""
+    raw_review = detail.get("blog_reviews", "")
     return PlaceCandidate(
         kakao_place_id=detail["kakao_place_id"],
         name=detail["name"],
@@ -57,8 +58,10 @@ def _build_candidate(detail: dict, summary_data: dict | None) -> PlaceCandidate:
         lat=detail["lat"],
         lng=detail["lng"],
         kakao_url=detail.get("kakao_url", ""),
+        kakao_category=detail.get("kakao_category", ""),
         summary=summary,
         caution=caution,
+        blog_review=raw_review[:150] if raw_review else "",
         photo_url=None,
     )
 
@@ -266,8 +269,10 @@ async def finalize_course(session: dict) -> str:
                 lat=detail["lat"],
                 lng=detail["lng"],
                 kakao_url=detail.get("kakao_url", ""),
+                kakao_category=detail.get("kakao_category", ""),
                 summary="",
                 caution="",
+                blog_review="",
                 photo_url=None,
             ),
         ))

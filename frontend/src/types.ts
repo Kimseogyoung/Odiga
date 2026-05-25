@@ -12,8 +12,10 @@ export interface PlaceCandidate {
   lat: number;
   lng: number;
   kakao_url: string;
+  kakao_category: string;
   summary: string;
   caution: string;
+  blog_review: string;
   photo_url: string | null;
 }
 

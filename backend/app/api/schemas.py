@@ -37,8 +37,10 @@ class PlaceCandidate(BaseModel):
     lat: float
     lng: float
     kakao_url: str
+    kakao_category: str = ""
     summary: str
     caution: str
+    blog_review: str = ""
     photo_url: str | None = None
 
 
