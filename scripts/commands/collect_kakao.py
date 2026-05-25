@@ -12,6 +12,7 @@ pageable_count 45 제한을 그리드 분할로 우회.
 """
 import asyncio
 import json
+import re
 import sys
 from datetime import datetime
 from pathlib import Path
@@ -133,6 +134,43 @@ def _parse_category(kakao_category: str) -> int:
     return PlaceCategory.RESTAURANT
 
 
+_PHOTO_SEM = asyncio.Semaphore(20)
+
+_OG_IMAGE_RE = re.compile(
+    r'<meta[^>]+property=["\']og:image["\'][^>]+content=["\']([^"\']+)["\']'
+    r'|<meta[^>]+content=["\']([^"\']+)["\'][^>]+property=["\']og:image["\']',
+    re.IGNORECASE,
+)
+
+
+async def _fetch_og_image(client: httpx.AsyncClient, url: str) -> str | None:
+    if not url:
+        return None
+    async with _PHOTO_SEM:
+        try:
+            resp = await client.get(url, timeout=10.0, follow_redirects=True)
+            if resp.status_code != 200:
+                return None
+            m = _OG_IMAGE_RE.search(resp.text)
+            raw = (m.group(1) or m.group(2)) if m else None
+            if raw and raw.startswith("//"):
+                raw = "https:" + raw
+            return raw
+        except Exception:
+            return None
+
+
+async def _attach_photos(client: httpx.AsyncClient, places: list[dict]) -> None:
+    """kakao_url에서 og:image를 병렬로 가져와 photo_url 필드 추가."""
+    photos = await asyncio.gather(*[
+        _fetch_og_image(client, p.get("kakao_url", "")) for p in places
+    ])
+    found = sum(1 for p in photos if p)
+    for place, photo in zip(places, photos):
+        place["photo_url"] = photo
+    print(f"  사진 수집: {found}/{len(places)}개")
+
+
 async def run() -> None:
     OUTPUT_PATH.parent.mkdir(parents=True, exist_ok=True)
 
@@ -163,6 +201,9 @@ async def run() -> None:
                     total += len(places)
                     all_places.extend(places)
                 print(f"  키워드 '{query}': {total}개")
+
+        print(f"\n[사진] og:image 수집 중... ({len(all_places)}개)")
+        await _attach_photos(client, all_places)
 
     data_str = json.dumps(all_places, ensure_ascii=False, indent=2)
     OUTPUT_PATH.write_text(data_str, encoding="utf-8")

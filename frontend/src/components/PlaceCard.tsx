@@ -19,9 +19,17 @@ export default function PlaceCard({ place, onSelect, disabled }: Props) {
 
   return (
     <div className="bg-white rounded-2xl shadow-md overflow-hidden border border-gray-100">
-      <div className="h-28 bg-gray-100 flex items-center justify-center text-5xl">
-        {CATEGORY_EMOJI[place.category_id] ?? CATEGORY_EMOJI_FALLBACK}
-      </div>
+      {place.photo_url ? (
+        <img
+          src={place.photo_url}
+          alt={place.name}
+          className="w-full h-40 object-cover"
+        />
+      ) : (
+        <div className="h-28 bg-gray-100 flex items-center justify-center text-5xl">
+          {CATEGORY_EMOJI[place.category_id] ?? CATEGORY_EMOJI_FALLBACK}
+        </div>
+      )}
       <div className="p-4 flex flex-col gap-2">
         <div className="flex items-start justify-between gap-2">
           <h3 className="font-bold text-gray-900 text-base leading-tight">{place.name}</h3>
