@@ -33,13 +33,13 @@ export default function PlannerPage() {
 
   const categories = constants?.categories ?? CATEGORY_LABEL;
 
-  async function handleFetchCandidates(extraExcludeIds: string[] = []) {
+  async function handleFetchCandidates(extraExcludeIds: string[] = [], catId?: number) {
     if (!sessionId) return;
     setError('');
     setLoadingCandidates(true);
     setCandidates([]);
     try {
-      const res = await getCandidates(sessionId, categoryId, extraExcludeIds);
+      const res = await getCandidates(sessionId, catId ?? categoryId, extraExcludeIds);
       if (res.candidates.length === 0) {
         setError('후보 장소가 없습니다. 다른 카테고리를 선택해 보세요.');
       }
@@ -124,9 +124,11 @@ export default function PlannerPage() {
               <button
                 key={id}
                 onClick={() => {
-                  setCategoryId(Number(id));
+                  const newId = Number(id);
+                  setCategoryId(newId);
                   setCandidates([]);
                   setSeenIds([]);
+                  handleFetchCandidates([], newId);
                 }}
                 className={`px-3 py-2 rounded-xl text-sm font-semibold transition ${
                   categoryId === Number(id)
@@ -138,13 +140,9 @@ export default function PlannerPage() {
               </button>
             ))}
           </div>
-          <button
-            onClick={() => handleFetchCandidates()}
-            disabled={loadingCandidates}
-            className="w-full py-3 bg-gray-900 text-white text-sm font-bold rounded-xl hover:bg-gray-700 active:scale-95 transition disabled:opacity-50"
-          >
-            {loadingCandidates ? '검색 중…' : '장소 찾기'}
-          </button>
+          {loadingCandidates && (
+            <p className="text-center text-sm text-gray-400 mt-1">검색 중…</p>
+          )}
         </section>
 
         {error && <p className="text-red-500 text-sm text-center">{error}</p>}
