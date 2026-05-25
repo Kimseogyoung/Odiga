@@ -24,5 +24,3 @@ services:
     ports:
       - "12000:12000"
 
-
-volumes:
