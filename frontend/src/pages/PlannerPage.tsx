@@ -18,7 +18,7 @@ export default function PlannerPage() {
 
   const [slot, setSlot] = useState<SlotInfo | null>(state?.slot ?? null);
   const [totalSlots] = useState(state?.total_slots ?? 1);
-  const [categoryId, setCategoryId] = useState<number>(1);
+  const [categoryId, setCategoryId] = useState<number | null>(null);
   const [candidateCache, setCandidateCache] = useState<Record<number, PlaceCandidate[]>>({});
   const [loadingCandidates, setLoadingCandidates] = useState(false);
   const [picking, setPicking] = useState(false);
@@ -26,7 +26,7 @@ export default function PlannerPage() {
   const [refreshCooldown, setRefreshCooldown] = useState(0);
   const [seenIds, setSeenIds] = useState<string[]>([]);
 
-  const candidates = candidateCache[categoryId] ?? [];
+  const candidates = categoryId !== null ? (candidateCache[categoryId] ?? []) : [];
   const [constants, setConstants] = useState<Constants | null>(null);
 
   useEffect(() => {
@@ -38,9 +38,10 @@ export default function PlannerPage() {
   async function handleFetchCandidates(extraExcludeIds: string[] = [], catId?: number) {
     if (!sessionId) return;
     const targetCatId = catId ?? categoryId;
+    if (targetCatId === null) return;
 
     // 캐시 히트: 새로고침 요청(extraExcludeIds 있음)이 아니면 캐시 반환
-    if (extraExcludeIds.length === 0 && candidateCache[targetCatId]?.length > 0) {
+    if (extraExcludeIds.length === 0 && (candidateCache[targetCatId]?.length ?? 0) > 0) {
       setCategoryId(targetCatId);
       return;
     }
@@ -84,7 +85,7 @@ export default function PlannerPage() {
       } else if (!res.done && res.slot) {
         setSlot(res.slot);
         setCandidateCache({});
-        setCategoryId(1);
+        setCategoryId(null);
         setSeenIds([]);
       }
     } catch {
@@ -111,7 +112,7 @@ export default function PlannerPage() {
         {/* 진행 상황 */}
         <div className="bg-white rounded-2xl p-4 shadow-sm">
           <div className="flex justify-between text-sm text-gray-500 mb-2">
-            <span>슬롯 {currentSlotNum} / {totalSlots}</span>
+            <span>코스 {currentSlotNum} / {totalSlots}</span>
             <span>남은 시간 {slot.remaining_minutes}분</span>
           </div>
           <div className="w-full bg-gray-100 rounded-full h-2">
@@ -141,7 +142,7 @@ export default function PlannerPage() {
                   categoryId === Number(id)
                     ? 'bg-black text-white'
                     : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                }`}
+                  }`}
               >
                 {label}
               </button>
