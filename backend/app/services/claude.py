@@ -19,7 +19,7 @@ from app.core.config import settings
 from app.core.constants import KEYWORD_LABEL
 
 
-_client = anthropic.Anthropic(api_key=settings.ANTHROPIC_API_KEY)
+_client = anthropic.AsyncAnthropic(api_key=settings.ANTHROPIC_API_KEY)
 
 _SUMMARIZE_SYSTEM = """당신은 서울 핫플레이스 전문 큐레이터입니다.
 장소 정보와 블로그 리뷰를 분석해서 JSON 형태로 요약을 작성합니다.
@@ -67,7 +67,7 @@ async def summarize_place(
         lines = "\n".join(f"- {t[:120]}" for t in tweets[:5])
         tweets_section = f"SNS 트윗:\n{lines}\n"
 
-    message = _client.messages.create(
+    message = await _client.messages.create(
         model="claude-haiku-4-5-20251001",
         max_tokens=256,
         system=_SUMMARIZE_SYSTEM,
@@ -93,7 +93,7 @@ async def tag_keywords(name: str, category: str, summary: str, reviews: str) -> 
         f"  {kid}: {label}" for kid, label in KEYWORD_LABEL.items()
     )
 
-    message = _client.messages.create(
+    message = await _client.messages.create(
         model="claude-haiku-4-5-20251001",
         max_tokens=128,
         system=_KEYWORD_SYSTEM,

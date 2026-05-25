@@ -1,10 +1,6 @@
 import json
+from app.core.config import settings
 from app.core.redis import get_redis
-
-
-TTL_DETAIL  = 60 * 60 * 24 * 30   # 30일
-TTL_VECTOR  = 60 * 60 * 24 * 30   # 30일
-TTL_SUMMARY = 60 * 60 * 24 * 7    # 7일
 
 
 # ── 장소 메타 ─────────────────────────────────────────────────────────────────
@@ -14,7 +10,7 @@ async def save_detail(place: dict) -> None:
     redis = await get_redis()
     pid = place["kakao_place_id"]
     detail = {k: v for k, v in place.items() if k != "embedding"}
-    await redis.set(f"places:detail:{pid}", json.dumps(detail, ensure_ascii=False), ex=TTL_DETAIL)
+    await redis.set(f"places:detail:{pid}", json.dumps(detail, ensure_ascii=False), ex=settings.TTL_PLACE_DETAIL_SECONDS)
 
 
 async def get_detail(kakao_place_id: str) -> dict | None:
@@ -38,8 +34,8 @@ async def save_region_category_vectors(
     redis = await get_redis()
     prefix = f"places:vectors:{region_id}:{category_id}"
     pipe = redis.pipeline()
-    pipe.set(f"{prefix}:ids",    json.dumps(ids),         ex=TTL_VECTOR)
-    pipe.set(f"{prefix}:matrix", json.dumps(matrix_flat), ex=TTL_VECTOR)
+    pipe.set(f"{prefix}:ids",    json.dumps(ids),         ex=settings.TTL_PLACE_VECTOR_SECONDS)
+    pipe.set(f"{prefix}:matrix", json.dumps(matrix_flat), ex=settings.TTL_PLACE_VECTOR_SECONDS)
     await pipe.execute()
 
 
@@ -70,7 +66,7 @@ def _keyword_key(keyword_ids: list[int]) -> str:
 
 async def save_keyword_vector(keyword_ids: list[int], vector: list[float]) -> None:
     redis = await get_redis()
-    await redis.set(_keyword_key(keyword_ids), json.dumps(vector), ex=TTL_VECTOR)
+    await redis.set(_keyword_key(keyword_ids), json.dumps(vector), ex=settings.TTL_PLACE_VECTOR_SECONDS)
 
 
 async def get_keyword_vector(keyword_ids: list[int]) -> list[float] | None:
@@ -86,7 +82,7 @@ async def save_summary(kakao_place_id: str, summary: dict) -> None:
     await redis.set(
         f"ai:summary:{kakao_place_id}",
         json.dumps(summary, ensure_ascii=False),
-        ex=TTL_SUMMARY,
+        # TTL 없음 — 파이프라인 실행 시에만 갱신되므로 만료 없이 유지
     )
 
 

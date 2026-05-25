@@ -1,3 +1,4 @@
+import asyncio
 import httpx
 from app.core.config import settings
 from app.core.constants import REGION_LABEL, KAKAO_CATEGORY_MAP, PlaceCategory
@@ -18,25 +19,27 @@ async def search_places_by_region(region_id: int) -> list[dict]:
     region_label = REGION_LABEL[region_id]
     headers = {"Authorization": f"KakaoAK {settings.KAKAO_API_KEY}"}
 
-    seen: set[str] = set()
-    places: list[dict] = []
+    category_params = [
+        {"query": region_label, "size": 15, "category_group_code": code}
+        for code in CATEGORY_CODES
+    ]
+    keyword_params = [
+        {"query": f"{region_label} {suffix}", "size": 15}
+        for suffix in KEYWORD_QUERIES
+    ]
+    all_params = category_params + keyword_params
 
     async with httpx.AsyncClient() as client:
-        # category_group_code 기반 (정확한 분류)
-        for code in CATEGORY_CODES:
-            params = {"query": region_label, "size": 15, "category_group_code": code}
-            response = await client.get(KAKAO_LOCAL_URL, headers=headers, params=params)
-            response.raise_for_status()
-            data = response.json()
-            _append_docs(data.get("documents", []), seen, places)
+        responses = await asyncio.gather(*[
+            client.get(KAKAO_LOCAL_URL, headers=headers, params=p)
+            for p in all_params
+        ])
 
-        # 키워드 기반 (술집, 편집샵 등 코드 없는 것)
-        for suffix in KEYWORD_QUERIES:
-            params = {"query": f"{region_label} {suffix}", "size": 15}
-            response = await client.get(KAKAO_LOCAL_URL, headers=headers, params=params)
-            response.raise_for_status()
-            data = response.json()
-            _append_docs(data.get("documents", []), seen, places)
+    seen: set[str] = set()
+    places: list[dict] = []
+    for response in responses:
+        response.raise_for_status()
+        _append_docs(response.json().get("documents", []), seen, places)
 
     return places
 

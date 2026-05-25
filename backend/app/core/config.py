@@ -23,6 +23,12 @@ class Settings(BaseSettings):
     TWITTER_AUTH_TOKEN: str = ""
     TWITTER_CT0: str = ""
 
+    # Redis TTL
+    TTL_PLACE_DETAIL_SECONDS: int = 60 * 60 * 24 * 30   # 30일
+    TTL_PLACE_VECTOR_SECONDS: int = 60 * 60 * 24 * 30   # 30일
+    TTL_COURSE_SECONDS:       int = 60 * 60 * 24 * 7    # 7일
+    # TTL_SUMMARY 없음 — 장소 요약은 파이프라인 실행 시에만 변경되므로 만료 없이 유지
+
     # Session
     SESSION_TTL_SECONDS: int = 1800  # 30분
 

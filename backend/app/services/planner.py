@@ -212,9 +212,8 @@ async def pick_place(session_id: str, session: dict, kakao_place_id: str, catego
 
 # ── 코스 완성 ─────────────────────────────────────────────────────────────────
 
-_WALK_SPEED_KMH  = 4.0   # 도보 속도
+_WALK_SPEED_KMH   = 4.0  # 도보 속도
 _ROUTE_CORRECTION = 1.1  # 직선거리 → 실제 경로 보정 (골목길 10%)
-_TTL_COURSE = 60 * 60 * 24 * 7  # 7일
 
 
 def haversine_minutes(lat1: float, lng1: float, lat2: float, lng2: float) -> int:
@@ -290,7 +289,7 @@ async def finalize_course(session: dict) -> str:
     await redis.set(
         f"course:{share_token}",
         course.model_dump_json(),
-        ex=_TTL_COURSE,
+        ex=settings.TTL_COURSE_SECONDS,
     )
 
     return share_token
