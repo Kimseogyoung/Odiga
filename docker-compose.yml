@@ -1,0 +1,32 @@
+services:
+  redis:
+    image: redis:7-alpine
+    restart: always
+    volumes:
+      - redis_data:/data
+    command: redis-server --save 60 1
+
+  backend:
+    build: ./backend
+    restart: always
+    env_file: ./backend/.env
+    ports:
+      - "11000:11000"
+    depends_on:
+      - redis
+
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        VITE_API_BASE_URL: "http://odiga-server.sandbox.seogyoung.com"
+        VITE_KAKAO_MAP_KEY: ${VITE_KAKAO_MAP_KEY}
+    restart: always
+    ports:
+      - "12000:12000"
+    depends_on:
+      - backend
+
+
+volumes:
+  redis_data:
