@@ -45,8 +45,9 @@ sudo yum install -y docker
 sudo systemctl enable --now docker
 sudo usermod -aG docker $USER && newgrp docker
 
-sudo curl -L "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+sudo curl -L "https://github.com/docker/compose/releases/download/v2.5.0/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
 sudo chmod +x /usr/local/bin/docker-compose
+sudo ln -s /usr/local/bin/docker-compose /usr/bin/docker-compose
 ```
 
 **2. 코드 받기**
@@ -71,12 +72,17 @@ KAKAO_API_KEY=...
 ALLOWED_ORIGINS=["http://odiga.sandbox.seogyoung.com"]
 ```
 
-**4. 빌드 & 실행**
+**4. Redis 실행 (독립)**
+```bash
+docker run -d --name redis --network host -v redis_data:/data redis:7-alpine redis-server --save 60 1
+```
+
+**5. 빌드 & 실행**
 ```bash
 docker-compose up -d --build
 ```
 
-**5. 상태 확인**
+**6. 상태 확인**
 ```bash
 docker-compose ps
 docker-compose logs -f backend

@@ -1,19 +1,18 @@
 services:
-  redis:
-    image: redis:7-alpine
-    restart: always
-    volumes:
-      - redis_data:/data
-    command: redis-server --save 60 1
-
   backend:
     build: ./backend
     restart: always
     env_file: ./backend/.env
-    ports:
-      - "11000:11000"
-    depends_on:
-      - redis
+    network_mode: host
+
+  scripts:
+    build:
+      context: .
+      dockerfile: scripts/Dockerfile
+    env_file: ./backend/.env
+    network_mode: host
+    profiles:
+      - pipeline
 
   frontend:
     build:
@@ -24,9 +23,6 @@ services:
     restart: always
     ports:
       - "12000:12000"
-    depends_on:
-      - backend
 
 
 volumes:
-  redis_data:
