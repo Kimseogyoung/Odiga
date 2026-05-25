@@ -62,7 +62,7 @@ def _build_candidate(detail: dict, summary_data: dict | None) -> PlaceCandidate:
         summary=summary,
         caution=caution,
         blog_review=raw_review[:150] if raw_review else "",
-        photo_url=None,
+        photo_url=detail.get("photo_url"),
     )
 
 
@@ -273,7 +273,7 @@ async def finalize_course(session: dict) -> str:
                 summary="",
                 caution="",
                 blog_review="",
-                photo_url=None,
+                photo_url=detail.get("photo_url"),
             ),
         ))
 
