@@ -23,6 +23,7 @@ export default function PlannerPage() {
   const [loadingCandidates, setLoadingCandidates] = useState(false);
   const [picking, setPicking] = useState(false);
   const [error, setError] = useState('');
+  const [refreshCooldown, setRefreshCooldown] = useState(0);
   const [constants, setConstants] = useState<Constants | null>(null);
 
   useEffect(() => {
@@ -47,6 +48,18 @@ export default function PlannerPage() {
     } finally {
       setLoadingCandidates(false);
     }
+  }
+
+  async function handleRefresh() {
+    if (refreshCooldown > 0 || loadingCandidates) return;
+    setRefreshCooldown(3);
+    const timer = setInterval(() => {
+      setRefreshCooldown((prev) => {
+        if (prev <= 1) { clearInterval(timer); return 0; }
+        return prev - 1;
+      });
+    }, 1000);
+    await handleFetchCandidates();
   }
 
   async function handlePick(place: PlaceCandidate) {
@@ -144,6 +157,13 @@ export default function PlannerPage() {
                 disabled={picking}
               />
             ))}
+            <button
+              onClick={handleRefresh}
+              disabled={refreshCooldown > 0 || loadingCandidates}
+              className="w-full py-3 border border-gray-300 text-gray-500 text-sm font-semibold rounded-xl hover:bg-gray-50 active:scale-95 transition disabled:opacity-40"
+            >
+              {refreshCooldown > 0 ? `다른 장소 보기 (${refreshCooldown}초)` : '다른 장소 보기'}
+            </button>
           </section>
         )}
       </div>

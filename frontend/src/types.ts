@@ -17,6 +17,7 @@ export interface PlaceCandidate {
   caution: string;
   blog_review: string;
   photo_url: string | null;
+  walk_minutes_from_prev: number | null;
 }
 
 export interface CourseItem {

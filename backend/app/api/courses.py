@@ -46,11 +46,19 @@ async def get_candidates(session_id: str, req: CandidatesRequest):
 
     exclude_ids = {s["kakao_place_id"] for s in session["selected"]}
 
+    prev_lat, prev_lng = None, None
+    if session["selected"]:
+        prev_detail = await place_store.get_detail(session["selected"][-1]["kakao_place_id"])
+        if prev_detail:
+            prev_lat, prev_lng = prev_detail["lat"], prev_detail["lng"]
+
     candidates = await planner.search_candidates(
         region_id=session["region_id"],
         keyword_ids=session["keyword_ids"],
         category_id=req.category_id,
         exclude_ids=exclude_ids,
+        prev_lat=prev_lat,
+        prev_lng=prev_lng,
     )
     if not candidates:
         raise HTTPException(status_code=503, detail="해당 조건의 장소 데이터가 없습니다.")

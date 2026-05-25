@@ -316,6 +316,8 @@ async def search_candidates(
     category_id: int,
     exclude_ids: set[str],
     top_k: int = 3,
+    prev_lat: float | None = None,
+    prev_lng: float | None = None,
 ) -> list[PlaceCandidate]:
     """
     1. 코사인 유사도 상위 pool 추출
@@ -355,4 +357,10 @@ async def search_candidates(
         place_store.get_summary(d["kakao_place_id"]) for d in picked_details
     ])
 
-    return [_build_candidate(d, s) for d, s in zip(picked_details, summaries)]
+    candidates = [_build_candidate(d, s) for d, s in zip(picked_details, summaries)]
+
+    if prev_lat is not None and prev_lng is not None:
+        for c in candidates:
+            c.walk_minutes_from_prev = haversine_minutes(prev_lat, prev_lng, c.lat, c.lng)
+
+    return candidates

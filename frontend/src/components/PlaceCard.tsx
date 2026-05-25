@@ -32,6 +32,9 @@ export default function PlaceCard({ place, onSelect, disabled }: Props) {
           )}
         </div>
         <p className="text-xs text-gray-400 line-clamp-1">{place.address}</p>
+        {place.walk_minutes_from_prev !== null && (
+          <p className="text-xs text-blue-400">이전 장소에서 도보 약 {place.walk_minutes_from_prev}분</p>
+        )}
         {/* summary: AI 요약(정식), blog_review: 블로그 원문 앞 150자 (임시 fallback — 추후 AI 요약으로 대체 예정) */}
         {review && (
           <p className="text-sm text-gray-600 line-clamp-3 leading-relaxed">{review}</p>

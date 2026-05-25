@@ -42,6 +42,7 @@ class PlaceCandidate(BaseModel):
     caution: str
     blog_review: str = ""
     photo_url: str | None = None
+    walk_minutes_from_prev: int | None = None
 
 
 class SlotInfo(BaseModel):
