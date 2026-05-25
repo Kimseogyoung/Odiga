@@ -4,7 +4,7 @@
 
 지역이랑 테마 고르면 AI가 오늘 하루 코스를 짜줌. 혼잡도, 이동시간, 리뷰 요약까지 포함해서 실제로 따라갈 수 있는 시간표로 만들어줌.
 
-<img src="docs/screenshot.png" width="320" alt="오늘의 코스 화면" />
+<img src="docs/img/20260526_screenshot.png" width="320" alt="오늘의 코스 화면" />
 
 ## 주요 기능
 
