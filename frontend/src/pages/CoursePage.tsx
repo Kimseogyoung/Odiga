@@ -76,22 +76,33 @@ function TimelineItem({ item, isLast }: { item: CourseItem; isLast: boolean }) {
             {CATEGORY_LABEL[item.place.category_id]} · {item.stay_minutes}분
           </span>
         </div>
-        <div className="mt-1 bg-white rounded-xl p-4 shadow-sm border border-gray-100">
-          <h3 className="font-bold text-gray-900">{item.place.name}</h3>
-          <p className="text-xs text-gray-500 mt-0.5 line-clamp-1">{item.place.address}</p>
-          {item.place.summary && (
-            <p className="text-sm text-gray-700 mt-2 line-clamp-2">{item.place.summary}</p>
-          )}
-          {item.place.kakao_url && (
-            <a
-              href={item.place.kakao_url}
-              target="_blank"
-              rel="noreferrer"
-              className="mt-2 inline-block text-xs text-blue-500 hover:underline"
-            >
-              카카오맵에서 보기
-            </a>
-          )}
+        <div className="mt-1 bg-white rounded-xl overflow-hidden shadow-sm border border-gray-100">
+          <div className="flex">
+            <div className="flex-1 p-4 min-w-0">
+              <h3 className="font-bold text-gray-900">{item.place.name}</h3>
+              <p className="text-xs text-gray-500 mt-0.5 line-clamp-1">{item.place.address}</p>
+              {item.place.summary && (
+                <p className="text-sm text-gray-700 mt-2 line-clamp-2">{item.place.summary}</p>
+              )}
+              {item.place.kakao_url && (
+                <a
+                  href={item.place.kakao_url}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="mt-2 inline-block text-xs text-blue-500 hover:underline"
+                >
+                  카카오맵에서 보기
+                </a>
+              )}
+            </div>
+            {item.place.photo_url && (
+              <img
+                src={item.place.photo_url}
+                alt={item.place.name}
+                className="w-24 object-cover shrink-0"
+              />
+            )}
+          </div>
         </div>
         {!isLast && (
           <p className="text-xs text-gray-400 mt-2 pl-1">
