@@ -1,8 +1,43 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { getCourse } from '../api/courses';
 import { CATEGORY_LABEL, CATEGORY_EMOJI, CATEGORY_EMOJI_FALLBACK } from '../constants';
 import type { CourseResponse, CourseItem } from '../types';
+
+function KakaoMap({ items }: { items: CourseItem[] }) {
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!containerRef.current || items.length === 0) return;
+
+    window.kakao.maps.load(() => {
+      const center = new window.kakao.maps.LatLng(items[0].place.lat, items[0].place.lng);
+      const map = new window.kakao.maps.Map(containerRef.current!, { center, level: 5 });
+      const bounds = new window.kakao.maps.LatLngBounds();
+
+      items.forEach((item, i) => {
+        const position = new window.kakao.maps.LatLng(item.place.lat, item.place.lng);
+        bounds.extend(position);
+
+        const content = `<div style="
+          width:28px;height:28px;border-radius:50%;
+          background:#000;color:#fff;
+          display:flex;align-items:center;justify-content:center;
+          font-size:13px;font-weight:700;
+          border:2px solid #fff;
+          box-shadow:0 2px 6px rgba(0,0,0,0.35);
+          cursor:default;
+        ">${i + 1}</div>`;
+
+        new window.kakao.maps.CustomOverlay({ position, content, yAnchor: 1, map });
+      });
+
+      map.setBounds(bounds);
+    });
+  }, [items]);
+
+  return <div ref={containerRef} className="w-full h-60 rounded-2xl overflow-hidden bg-gray-100" />;
+}
 
 function TimelineItem({ item, isLast }: { item: CourseItem; isLast: boolean }) {
   return (
@@ -106,6 +141,9 @@ export default function CoursePage() {
         >
           {copied ? '링크 복사됨!' : '공유 링크 복사'}
         </button>
+
+        {/* 지도 */}
+        <KakaoMap items={course.items} />
 
         {/* 시간표 */}
         <div className="pt-2">
