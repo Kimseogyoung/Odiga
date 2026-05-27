@@ -18,7 +18,7 @@ services:
     build:
       context: ./frontend
       args:
-        VITE_API_BASE_URL: "http://odiga-server.sandbox.seogyoung.com"
+        VITE_API_BASE_URL: "https://odiga-server.sandbox.seogyoung.com"
     restart: always
     ports:
       - "12000:12000"
