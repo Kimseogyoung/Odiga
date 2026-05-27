@@ -5,15 +5,6 @@ services:
     env_file: ./backend/.env
     network_mode: host
 
-  scripts:
-    build:
-      context: .
-      dockerfile: scripts/Dockerfile
-    env_file: ./backend/.env
-    network_mode: host
-    profiles:
-      - pipeline
-
   frontend:
     build:
       context: ./frontend
