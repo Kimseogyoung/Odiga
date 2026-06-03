@@ -128,10 +128,31 @@ export default function CoursePage() {
   }, [shareToken]);
 
   function handleCopy() {
-    navigator.clipboard.writeText(window.location.href).then(() => {
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    });
+    const url = window.location.href;
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(url)
+        .then(() => markCopied())
+        .catch(() => fallbackCopy(url));
+    } else {
+      fallbackCopy(url);
+    }
+  }
+
+  function fallbackCopy(text: string) {
+    const el = document.createElement('textarea');
+    el.value = text;
+    el.style.cssText = 'position:fixed;top:0;left:0;opacity:0;font-size:16px;';
+    el.setAttribute('readonly', '');
+    document.body.appendChild(el);
+    el.focus();
+    el.setSelectionRange(0, 999999);
+    if (document.execCommand('copy')) markCopied();
+    document.body.removeChild(el);
+  }
+
+  function markCopied() {
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
   }
 
   if (error) {
