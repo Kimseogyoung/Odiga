@@ -1,11 +1,27 @@
 @import "tailwindcss";
 
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
+@theme {
+  --color-brand: #FFD663;
+  --color-brand-light: #FFFBEA;
+  --color-brand-dark: #B8860B;
+  --color-page: #FAFAF8;
+  --font-sans: 'Pretendard Variable', 'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif;
 }
 
-body {
-  -webkit-font-smoothing: antialiased;
+@layer base {
+  body {
+    font-family: 'Pretendard Variable', Pretendard, -apple-system, BlinkMacSystemFont, sans-serif;
+    background-color: #FAFAF8;
+    color: #1A1A1A;
+    -webkit-font-smoothing: antialiased;
+  }
+}
+
+@layer utilities {
+  .scrollbar-none {
+    scrollbar-width: none;
+  }
+  .scrollbar-none::-webkit-scrollbar {
+    display: none;
+  }
 }

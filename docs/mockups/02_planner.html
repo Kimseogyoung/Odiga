@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>오디가 — 플래너</title>
+<link rel="preconnect" href="https://cdn.jsdelivr.net">
+<link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" rel="stylesheet"/>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --brand:       #FFD663;
+  --brand-light: #FFFBEA;
+  --brand-dark:  #B8860B;
+  --bg:          #FAFAF8;
+  --card:        #FFFFFF;
+  --text:        #1A1A1A;
+  --sub:         #888888;
+  --weak:        #BBBBBB;
+  --border:      #F0F0F0;
+}
+
+body {
+  font-family: 'Pretendard Variable', Pretendard, -apple-system, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  max-width: 480px;
+  margin: 0 auto;
+  min-height: 100svh;
+  padding-bottom: 40px;
+}
+
+/* ─── 상단 네비 바 ─── */
+.top-bar {
+  position: sticky; top: 0; z-index: 100;
+  background: var(--card);
+  border-bottom: 1px solid var(--border);
+  padding: 12px 20px;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.back-btn {
+  width: 36px; height: 36px; border-radius: 50%;
+  background: #F4F4F0; border: none; cursor: pointer;
+  display: flex; align-items: center; justify-content: center; font-size: 16px;
+}
+.top-title { font-size: 15px; font-weight: 800; letter-spacing: -0.3px; }
+.top-spacer { width: 36px; }
+
+/* ─── 진행 카드 ─── */
+.prog-card {
+  background: var(--brand-light);
+  padding: 16px 20px;
+  border-bottom: 1px solid rgba(255,214,99,0.3);
+}
+.prog-row {
+  display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;
+}
+.prog-label { font-size: 13px; font-weight: 700; color: var(--brand-dark); }
+.prog-time  { font-size: 12px; font-weight: 600; color: var(--brand-dark); opacity: .8; }
+.prog-bar   { height: 7px; background: rgba(255,214,99,0.25); border-radius: 100px; overflow: hidden; }
+.prog-fill  { width: 33%; height: 100%; background: var(--brand); border-radius: 100px; }
+.prog-step  { margin-top: 10px; text-align: center; font-size: 14px; font-weight: 800; color: var(--brand-dark); }
+
+/* ─── 카테고리 칩 ─── */
+.cat-row {
+  display: flex; gap: 8px; overflow-x: auto;
+  padding: 14px 20px;
+  scrollbar-width: none; border-bottom: 1px solid var(--border);
+}
+.cat-row::-webkit-scrollbar { display: none; }
+.cat-chip {
+  flex-shrink: 0; padding: 9px 16px; border-radius: 100px;
+  font-size: 13px; font-weight: 700; font-family: inherit;
+  border: none; cursor: pointer; background: #F4F4F0; color: var(--sub);
+  transition: all .15s;
+}
+.cat-chip.on { background: var(--brand); color: var(--text); box-shadow: 0 2px 8px rgba(255,214,99,0.4); }
+
+/* ─── 본문 ─── */
+.body { padding: 14px 20px; display: flex; flex-direction: column; gap: 12px; }
+
+.list-label { font-size: 12px; font-weight: 700; color: var(--weak); letter-spacing: 0.3px; }
+
+/* ─── 장소 카드 (리스트형) ─── */
+.place-card {
+  background: var(--card); border-radius: 18px; overflow: hidden;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.05), 0 0 0 1px rgba(0,0,0,0.04);
+  display: flex;
+}
+.place-img {
+  width: 80px; flex-shrink: 0;
+  background: linear-gradient(135deg, var(--brand-light) 0%, #FFF3C0 100%);
+  display: flex; align-items: center; justify-content: center; font-size: 32px;
+}
+.place-body { flex: 1; padding: 12px 14px; display: flex; flex-direction: column; gap: 5px; min-width: 0; }
+.place-top  { display: flex; align-items: center; justify-content: space-between; gap: 6px; }
+.place-name { font-size: 14px; font-weight: 700; }
+.place-badge {
+  font-size: 10px; font-weight: 700;
+  background: var(--brand-light); color: var(--brand-dark);
+  padding: 3px 9px; border-radius: 100px; white-space: nowrap; flex-shrink: 0;
+}
+.place-addr { font-size: 11px; color: var(--weak); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.place-walk { font-size: 11px; color: var(--brand-dark); font-weight: 600; }
+.place-foot { display: flex; align-items: center; justify-content: space-between; margin-top: 2px; }
+.place-kakao { font-size: 11px; color: var(--brand-dark); font-weight: 600; text-decoration: none; }
+.pick-btn {
+  padding: 7px 14px; border-radius: 100px;
+  background: var(--brand); color: var(--text);
+  font-size: 12px; font-weight: 700; font-family: inherit;
+  border: none; cursor: pointer;
+  box-shadow: 0 2px 8px rgba(255,214,99,0.45);
+}
+
+/* ─── 더 보기 ─── */
+.more-btn {
+  width: 100%; padding: 14px; border-radius: 100px;
+  background: var(--card); border: 1.5px solid var(--border);
+  font-size: 13px; font-weight: 700; font-family: inherit; color: var(--sub); cursor: pointer;
+}
+</style>
+</head>
+<body>
+
+<div class="top-bar">
+  <button class="back-btn">←</button>
+  <span class="top-title">코스 만드는 중</span>
+  <div class="top-spacer"></div>
+</div>
+
+<div class="prog-card">
+  <div class="prog-row">
+    <span class="prog-label">코스 1 / 3</span>
+    <span class="prog-time">남은 시간 210분</span>
+  </div>
+  <div class="prog-bar"><div class="prog-fill"></div></div>
+  <div class="prog-step">12:00 출발 🚀 · 지금은 1번째 장소 고르는 중</div>
+</div>
+
+<div class="cat-row">
+  <button class="cat-chip on">🍜 음식점</button>
+  <button class="cat-chip">☕ 카페</button>
+  <button class="cat-chip">🛍 쇼핑</button>
+  <button class="cat-chip">🎨 전시</button>
+  <button class="cat-chip">🍺 바/펍</button>
+</div>
+
+<div class="body">
+
+  <div class="list-label">추천 장소 3곳</div>
+
+  <div class="place-card">
+    <div class="place-img">🍜</div>
+    <div class="place-body">
+      <div class="place-top">
+        <span class="place-name">성수연방 브런치</span>
+        <span class="place-badge">한식·브런치</span>
+      </div>
+      <div class="place-addr">서울 성동구 성수이로 78</div>
+      <div class="place-walk">🚶 도보 약 5분</div>
+      <div class="place-foot">
+        <a class="place-kakao" href="#">카카오맵 →</a>
+        <button class="pick-btn">여기 갈래요 ✓</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="place-card">
+    <div class="place-img">🥩</div>
+    <div class="place-body">
+      <div class="place-top">
+        <span class="place-name">성수 소금구이</span>
+        <span class="place-badge">한식·고기</span>
+      </div>
+      <div class="place-addr">서울 성동구 아차산로 43</div>
+      <div class="place-walk">🚶 도보 약 8분</div>
+      <div class="place-foot">
+        <a class="place-kakao" href="#">카카오맵 →</a>
+        <button class="pick-btn">여기 갈래요 ✓</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="place-card">
+    <div class="place-img">🥗</div>
+    <div class="place-body">
+      <div class="place-top">
+        <span class="place-name">그린보울 성수</span>
+        <span class="place-badge">샐러드·건강식</span>
+      </div>
+      <div class="place-addr">서울 성동구 성수일로 89</div>
+      <div class="place-walk">🚶 도보 약 6분</div>
+      <div class="place-foot">
+        <a class="place-kakao" href="#">카카오맵 →</a>
+        <button class="pick-btn">여기 갈래요 ✓</button>
+      </div>
+    </div>
+  </div>
+
+  <button class="more-btn">다른 장소 더 보기</button>
+
+</div>
+
+</body>
+</html>

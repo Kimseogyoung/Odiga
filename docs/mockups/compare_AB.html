@@ -1,0 +1,608 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Odiga — Pattern A vs B 비교</title>
+<link rel="preconnect" href="https://cdn.jsdelivr.net">
+<link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" rel="stylesheet"/>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Pretendard Variable', Pretendard, -apple-system, sans-serif;
+  background: #F0EFE9;
+  padding: 48px 24px 80px;
+  color: #1A1A1A;
+}
+
+/* ── 레이아웃 ── */
+h1 {
+  text-align: center;
+  font-size: 22px;
+  font-weight: 900;
+  letter-spacing: -0.5px;
+  margin-bottom: 6px;
+}
+.subtitle {
+  text-align: center;
+  font-size: 13px;
+  color: #888;
+  margin-bottom: 48px;
+}
+
+.section-title {
+  text-align: center;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 2.5px;
+  text-transform: uppercase;
+  color: #aaa;
+  margin-bottom: 20px;
+}
+
+.compare-row {
+  display: flex;
+  gap: 24px;
+  justify-content: center;
+  margin-bottom: 64px;
+  flex-wrap: wrap;
+}
+
+.col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.col-label {
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  padding: 5px 16px;
+  border-radius: 100px;
+}
+.col-label.a { background: #FFD663; color: #3D2800; }
+.col-label.b { background: #1A1A1A; color: #FFD663; }
+
+.col-desc {
+  font-size: 12px;
+  color: #999;
+  text-align: center;
+  max-width: 200px;
+  line-height: 1.5;
+}
+
+/* ── 공통 토큰 ── */
+:root {
+  --brand:       #FFD663;
+  --brand-light: #FFFBEA;
+  --brand-dark:  #B8860B;
+  --bg:          #FAFAF8;
+  --card:        #FFFFFF;
+  --text-main:   #1A1A1A;
+  --text-sub:    #888888;
+  --text-weak:   #BBBBBB;
+  --border:      #F0F0F0;
+}
+
+/* ── 폰 프레임 ── */
+.phone {
+  width: 320px;
+  background: var(--bg);
+  border-radius: 36px;
+  box-shadow: 0 24px 60px rgba(0,0,0,0.13), 0 0 0 1px rgba(0,0,0,0.07);
+  overflow: hidden;
+  padding: 40px 18px 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.card {
+  background: var(--card);
+  border-radius: 22px;
+  padding: 18px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.05), 0 0 0 1px rgba(0,0,0,0.04);
+}
+.card-label {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-sub);
+  margin-bottom: 12px;
+}
+
+/* 헤더 */
+.app-header { text-align: center; }
+.app-name { font-size: 28px; font-weight: 900; letter-spacing: -1px; }
+.app-tagline { font-size: 13px; color: var(--text-sub); margin-top: 4px; }
+
+/* 지역 버튼 */
+.region-group { display: flex; gap: 6px; }
+.region-btn {
+  flex: 1; padding: 10px 0; border-radius: 100px;
+  font-size: 13px; font-weight: 700; border: none; cursor: pointer;
+  font-family: inherit; transition: all .15s;
+}
+
+/* chip */
+.chip-group { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip {
+  padding: 7px 14px; border-radius: 100px;
+  font-size: 12px; font-weight: 600; border: none; cursor: pointer;
+  font-family: inherit; transition: all .15s;
+}
+.chip.inactive { background: #F4F4F2; color: var(--text-sub); }
+
+/* time */
+.time-row { display: flex; align-items: center; gap: 8px; }
+.time-box {
+  flex: 1; border: 1.5px solid var(--border); border-radius: 14px;
+  padding: 10px; font-size: 14px; font-weight: 700;
+  text-align: center; color: var(--text-main); background: #fff;
+  font-family: inherit;
+}
+.time-sep { font-size: 12px; color: var(--text-weak); }
+
+/* progress */
+.progress-bar-bg {
+  width: 100%; height: 7px; border-radius: 100px; overflow: hidden;
+}
+.progress-bar-fill { height: 100%; width: 33%; border-radius: 100px; }
+.progress-meta {
+  display: flex; justify-content: space-between;
+  font-size: 12px; font-weight: 600; margin-bottom: 8px;
+}
+.progress-time {
+  margin-top: 8px; text-align: center;
+  font-size: 14px; font-weight: 800;
+}
+
+/* place card */
+.place-card {
+  background: var(--card); border-radius: 20px; overflow: hidden;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.05), 0 0 0 1px rgba(0,0,0,0.04);
+}
+.place-thumb {
+  width: 100%; height: 100px;
+  display: flex; align-items: center; justify-content: center; font-size: 36px;
+}
+.place-body { padding: 14px; display: flex; flex-direction: column; gap: 6px; }
+.place-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 6px; }
+.place-name { font-size: 14px; font-weight: 700; }
+.place-badge {
+  font-size: 10px; font-weight: 700;
+  border-radius: 100px; padding: 3px 9px; white-space: nowrap; flex-shrink: 0;
+}
+.place-addr { font-size: 11px; color: var(--text-weak); }
+.place-review { font-size: 12px; color: #555; line-height: 1.5; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.place-footer { display: flex; align-items: center; justify-content: space-between; margin-top: 4px; }
+.place-kakao { font-size: 11px; font-weight: 600; text-decoration: none; }
+.pick-btn {
+  padding: 9px 18px; border-radius: 100px;
+  font-size: 12px; font-weight: 700; border: none; cursor: pointer; font-family: inherit;
+}
+
+/* timeline */
+.timeline { display: flex; flex-direction: column; }
+.tl-item { display: flex; gap: 12px; }
+.tl-left { display: flex; flex-direction: column; align-items: center; }
+.tl-dot {
+  width: 36px; height: 36px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px; flex-shrink: 0;
+}
+.tl-line { width: 2px; flex: 1; background: var(--border); margin: 3px 0; }
+.tl-content { flex: 1; padding-bottom: 16px; }
+.tl-time-row { display: flex; align-items: baseline; gap: 5px; margin-top: 4px; }
+.tl-time { font-size: 12px; font-weight: 800; }
+.tl-meta { font-size: 10px; color: var(--text-weak); }
+.tl-card {
+  margin-top: 7px; background: var(--card); border-radius: 16px; overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05), 0 0 0 1px rgba(0,0,0,0.04);
+}
+.tl-inner { display: flex; }
+.tl-body { flex: 1; padding: 12px; min-width: 0; }
+.tl-name { font-size: 13px; font-weight: 700; }
+.tl-addr { font-size: 10px; color: var(--text-weak); margin-top: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.tl-img {
+  width: 70px; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center; font-size: 26px;
+}
+.tl-walk { font-size: 10px; color: var(--text-weak); margin-top: 6px; }
+
+/* share btn */
+.share-btn {
+  width: 100%; padding: 13px;
+  border-radius: 100px; background: #fff;
+  border: 1.5px solid var(--border);
+  color: var(--text-sub); font-size: 13px; font-weight: 700;
+  font-family: inherit; cursor: pointer;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+}
+.map-ph {
+  width: 100%; height: 130px;
+  background: linear-gradient(135deg, #e8f4f8 0%, #d4eaf3 100%);
+  border-radius: 20px;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+}
+.map-ph span:first-child { font-size: 28px; }
+.map-ph span:last-child { font-size: 11px; font-weight: 600; color: #6a9fbf; }
+
+.new-link { text-align: center; font-size: 12px; color: var(--text-weak); }
+
+/* ════════════════════════
+   PATTERN A
+   노랑 fill + 다크 텍스트
+════════════════════════ */
+.a .region-btn.active  { background: var(--brand); color: #1A1A1A; box-shadow: 0 4px 12px rgba(255,214,99,0.4); }
+.a .region-btn.inactive { background: #F4F4F2; color: var(--text-sub); }
+.a .chip.active        { background: var(--brand); color: #1A1A1A; }
+.a .time-box:focus     { border-color: var(--brand); outline: none; }
+.a .cta-btn {
+  width: 100%; padding: 16px; border-radius: 100px;
+  background: var(--brand); color: #1A1A1A;
+  font-size: 15px; font-weight: 800; border: none; cursor: pointer; font-family: inherit;
+  box-shadow: 0 8px 20px rgba(255,214,99,0.5);
+}
+.a .progress-card {
+  background: var(--brand-light); border-radius: 22px; padding: 16px 18px;
+  box-shadow: 0 2px 10px rgba(255,214,99,0.2);
+}
+.a .progress-bar-bg   { background: rgba(255,214,99,0.25); }
+.a .progress-bar-fill { background: var(--brand); }
+.a .progress-meta     { color: var(--brand-dark); }
+.a .progress-time     { color: var(--brand-dark); }
+.a .place-thumb       { background: linear-gradient(135deg, var(--brand-light), #FFF3C0); }
+.a .place-badge       { background: var(--brand); color: #1A1A1A; }
+.a .place-kakao       { color: var(--brand-dark); }
+.a .pick-btn          { background: var(--brand); color: #1A1A1A; box-shadow: 0 4px 12px rgba(255,214,99,0.4); }
+.a .tl-dot            { background: var(--brand); color: #1A1A1A; box-shadow: 0 4px 10px rgba(255,214,99,0.4); }
+.a .tl-img            { background: linear-gradient(135deg, var(--brand-light), #FFF3C0); }
+
+/* ════════════════════════
+   PATTERN B
+   어두운 버튼 + 노랑 accent
+════════════════════════ */
+.b .region-btn.active  { background: #1A1A1A; color: var(--brand); box-shadow: 0 4px 12px rgba(0,0,0,0.2); }
+.b .region-btn.inactive { background: #F4F4F2; color: var(--text-sub); }
+.b .chip.active        { background: var(--brand-light); color: #1A1A1A; box-shadow: 0 0 0 1.5px var(--brand); }
+.b .cta-btn {
+  width: 100%; padding: 16px; border-radius: 100px;
+  background: #1A1A1A; color: var(--brand);
+  font-size: 15px; font-weight: 800; border: none; cursor: pointer; font-family: inherit;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.18);
+}
+.b .progress-card {
+  background: #1A1A1A; border-radius: 22px; padding: 16px 18px;
+}
+.b .progress-bar-bg   { background: rgba(255,255,255,0.12); }
+.b .progress-bar-fill { background: var(--brand); }
+.b .progress-meta     { color: var(--brand); }
+.b .progress-time     { color: #fff; }
+.b .place-thumb       { background: #F4F4F2; }
+.b .place-badge       { background: #1A1A1A; color: var(--brand); }
+.b .place-kakao       { color: #1A1A1A; font-weight: 700; }
+.b .pick-btn          { background: #1A1A1A; color: var(--brand); box-shadow: 0 4px 12px rgba(0,0,0,0.2); }
+.b .tl-dot            { background: #1A1A1A; color: var(--brand); box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
+.b .tl-img            { background: #F4F4F2; }
+
+/* divider */
+.divider {
+  width: 100%; height: 1px; background: rgba(0,0,0,0.08); margin: 16px 0 56px;
+}
+</style>
+</head>
+<body>
+
+<h1>Pattern A vs B</h1>
+<p class="subtitle">#FFD663 포인트 컬러 적용 방식 비교</p>
+
+<!-- ═══════════════ SCREEN 1: HOME ═══════════════ -->
+<div class="section-title">Screen 01 — Home</div>
+<div class="compare-row">
+
+  <!-- A -->
+  <div class="col">
+    <span class="col-label a">Pattern A</span>
+    <span class="col-desc">노랑 fill + 다크 텍스트<br>버튼·chip 전면 노랑</span>
+    <div class="phone a">
+      <div class="app-header">
+        <div class="app-name">오디가</div>
+        <div class="app-tagline">서울의 하루를 짜드릴게요 ✨</div>
+      </div>
+      <div class="card">
+        <div class="card-label">📍 어디로 갈까요?</div>
+        <div class="region-group">
+          <button class="region-btn inactive">성수</button>
+          <button class="region-btn active">홍대</button>
+          <button class="region-btn inactive">연남</button>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-label">🏷️ 오늘의 무드</div>
+        <div class="chip-group">
+          <button class="chip active">감성</button>
+          <button class="chip active">카페</button>
+          <button class="chip inactive">힙한</button>
+          <button class="chip inactive">디저트</button>
+          <button class="chip inactive">빈티지</button>
+          <button class="chip inactive">포토스팟</button>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-label">🕐 몇 시부터 몇 시까지?</div>
+        <div class="time-row">
+          <div class="time-box">12:00</div>
+          <span class="time-sep">~</span>
+          <div class="time-box">18:00</div>
+        </div>
+      </div>
+      <button class="cta-btn">코스 짜러 가기 →</button>
+    </div>
+  </div>
+
+  <!-- B -->
+  <div class="col">
+    <span class="col-label b">Pattern B</span>
+    <span class="col-desc">어두운 버튼 + 노랑 accent<br>버튼은 검정, chip만 노랑</span>
+    <div class="phone b">
+      <div class="app-header">
+        <div class="app-name">오디가</div>
+        <div class="app-tagline">서울의 하루를 짜드릴게요 ✨</div>
+      </div>
+      <div class="card">
+        <div class="card-label">📍 어디로 갈까요?</div>
+        <div class="region-group">
+          <button class="region-btn inactive">성수</button>
+          <button class="region-btn active">홍대</button>
+          <button class="region-btn inactive">연남</button>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-label">🏷️ 오늘의 무드</div>
+        <div class="chip-group">
+          <button class="chip active">감성</button>
+          <button class="chip active">카페</button>
+          <button class="chip inactive">힙한</button>
+          <button class="chip inactive">디저트</button>
+          <button class="chip inactive">빈티지</button>
+          <button class="chip inactive">포토스팟</button>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-label">🕐 몇 시부터 몇 시까지?</div>
+        <div class="time-row">
+          <div class="time-box">12:00</div>
+          <span class="time-sep">~</span>
+          <div class="time-box">18:00</div>
+        </div>
+      </div>
+      <button class="cta-btn">코스 짜러 가기 →</button>
+    </div>
+  </div>
+
+</div>
+
+<!-- ═══════════════ SCREEN 2: PLANNER ═══════════════ -->
+<div class="section-title">Screen 02 — Planner</div>
+<div class="compare-row">
+
+  <!-- A -->
+  <div class="col">
+    <span class="col-label a">Pattern A</span>
+    <div class="phone a">
+      <div class="progress-card">
+        <div class="progress-meta"><span>코스 1 / 3</span><span>남은 시간 210분</span></div>
+        <div class="progress-bar-bg"><div class="progress-bar-fill"></div></div>
+        <div class="progress-time">12:00 출발 🚀</div>
+      </div>
+      <div class="card">
+        <div class="card-label">어떤 곳에 갈까요?</div>
+        <div class="chip-group">
+          <button class="chip inactive">☕ 카페</button>
+          <button class="chip active">🍜 음식점</button>
+          <button class="chip inactive">🛍 쇼핑</button>
+          <button class="chip inactive">🎨 전시</button>
+        </div>
+      </div>
+      <div class="place-card">
+        <div class="place-thumb">🍳</div>
+        <div class="place-body">
+          <div class="place-top">
+            <div class="place-name">성수연방 브런치</div>
+            <span class="place-badge">브런치</span>
+          </div>
+          <div class="place-addr">서울 성동구 성수이로 78</div>
+          <div class="place-review">성수 감성 브런치 맛집. 에그베네딕트가 특히 유명해요.</div>
+          <div class="place-footer">
+            <a class="place-kakao" href="#">카카오맵 →</a>
+            <button class="pick-btn">여기 갈래요 ✓</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- B -->
+  <div class="col">
+    <span class="col-label b">Pattern B</span>
+    <div class="phone b">
+      <div class="progress-card">
+        <div class="progress-meta"><span>코스 1 / 3</span><span>남은 시간 210분</span></div>
+        <div class="progress-bar-bg"><div class="progress-bar-fill"></div></div>
+        <div class="progress-time">12:00 출발 🚀</div>
+      </div>
+      <div class="card">
+        <div class="card-label">어떤 곳에 갈까요?</div>
+        <div class="chip-group">
+          <button class="chip inactive">☕ 카페</button>
+          <button class="chip active">🍜 음식점</button>
+          <button class="chip inactive">🛍 쇼핑</button>
+          <button class="chip inactive">🎨 전시</button>
+        </div>
+      </div>
+      <div class="place-card">
+        <div class="place-thumb">🍳</div>
+        <div class="place-body">
+          <div class="place-top">
+            <div class="place-name">성수연방 브런치</div>
+            <span class="place-badge">브런치</span>
+          </div>
+          <div class="place-addr">서울 성동구 성수이로 78</div>
+          <div class="place-review">성수 감성 브런치 맛집. 에그베네딕트가 특히 유명해요.</div>
+          <div class="place-footer">
+            <a class="place-kakao" href="#">카카오맵 →</a>
+            <button class="pick-btn">여기 갈래요 ✓</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ═══════════════ SCREEN 3: COURSE ═══════════════ -->
+<div class="section-title">Screen 03 — Course</div>
+<div class="compare-row">
+
+  <!-- A -->
+  <div class="col">
+    <span class="col-label a">Pattern A</span>
+    <div class="phone a">
+      <div class="app-header">
+        <div class="app-name" style="font-size:20px;">오늘의 코스 🗺️</div>
+        <div class="app-tagline">12:00 ~ 18:00 · 3곳</div>
+      </div>
+      <button class="share-btn">🔗 공유 링크 복사</button>
+      <div class="map-ph"><span>🗺️</span><span>카카오맵</span></div>
+      <div class="timeline">
+        <div class="tl-item">
+          <div class="tl-left">
+            <div class="tl-dot">☕</div>
+            <div class="tl-line"></div>
+          </div>
+          <div class="tl-content">
+            <div class="tl-time-row"><span class="tl-time">12:00</span><span class="tl-meta">카페 · 90분</span></div>
+            <div class="tl-card">
+              <div class="tl-inner">
+                <div class="tl-body"><div class="tl-name">어니언 성수</div><div class="tl-addr">서울 성동구 아차산로9길 8</div></div>
+                <div class="tl-img">☕</div>
+              </div>
+            </div>
+            <div class="tl-walk">🚶 도보 약 8분</div>
+          </div>
+        </div>
+        <div class="tl-item">
+          <div class="tl-left">
+            <div class="tl-dot">🍜</div>
+          </div>
+          <div class="tl-content">
+            <div class="tl-time-row"><span class="tl-time">13:38</span><span class="tl-meta">음식점 · 60분</span></div>
+            <div class="tl-card">
+              <div class="tl-inner">
+                <div class="tl-body"><div class="tl-name">성수연방 브런치</div><div class="tl-addr">서울 성동구 성수이로 78</div></div>
+                <div class="tl-img">🍳</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="new-link">새 코스 만들기</div>
+    </div>
+  </div>
+
+  <!-- B -->
+  <div class="col">
+    <span class="col-label b">Pattern B</span>
+    <div class="phone b">
+      <div class="app-header">
+        <div class="app-name" style="font-size:20px;">오늘의 코스 🗺️</div>
+        <div class="app-tagline">12:00 ~ 18:00 · 3곳</div>
+      </div>
+      <button class="share-btn">🔗 공유 링크 복사</button>
+      <div class="map-ph"><span>🗺️</span><span>카카오맵</span></div>
+      <div class="timeline">
+        <div class="tl-item">
+          <div class="tl-left">
+            <div class="tl-dot">☕</div>
+            <div class="tl-line"></div>
+          </div>
+          <div class="tl-content">
+            <div class="tl-time-row"><span class="tl-time">12:00</span><span class="tl-meta">카페 · 90분</span></div>
+            <div class="tl-card">
+              <div class="tl-inner">
+                <div class="tl-body"><div class="tl-name">어니언 성수</div><div class="tl-addr">서울 성동구 아차산로9길 8</div></div>
+                <div class="tl-img">☕</div>
+              </div>
+            </div>
+            <div class="tl-walk">🚶 도보 약 8분</div>
+          </div>
+        </div>
+        <div class="tl-item">
+          <div class="tl-left">
+            <div class="tl-dot">🍜</div>
+          </div>
+          <div class="tl-content">
+            <div class="tl-time-row"><span class="tl-time">13:38</span><span class="tl-meta">음식점 · 60분</span></div>
+            <div class="tl-card">
+              <div class="tl-inner">
+                <div class="tl-body"><div class="tl-name">성수연방 브런치</div><div class="tl-addr">서울 성동구 성수이로 78</div></div>
+                <div class="tl-img">🍳</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="new-link">새 코스 만들기</div>
+    </div>
+  </div>
+
+</div>
+
+<!-- 판정 -->
+<div style="max-width:720px;margin:0 auto;background:#fff;border-radius:24px;padding:28px 32px;box-shadow:0 2px 12px rgba(0,0,0,0.06);">
+  <p style="font-size:13px;font-weight:800;color:#888;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:16px;">각 패턴 특징 요약</p>
+  <table style="width:100%;border-collapse:collapse;font-size:13px;">
+    <thead>
+      <tr style="border-bottom:2px solid #f0f0f0;">
+        <th style="text-align:left;padding:8px 12px;color:#888;font-weight:700;"></th>
+        <th style="text-align:center;padding:8px 12px;"><span style="background:#FFD663;color:#3D2800;padding:3px 12px;border-radius:100px;font-weight:800;font-size:12px;">Pattern A</span></th>
+        <th style="text-align:center;padding:8px 12px;"><span style="background:#1A1A1A;color:#FFD663;padding:3px 12px;border-radius:100px;font-weight:800;font-size:12px;">Pattern B</span></th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr style="border-bottom:1px solid #f5f5f5;">
+        <td style="padding:10px 12px;color:#555;font-weight:600;">CTA 버튼</td>
+        <td style="text-align:center;padding:10px 12px;">노랑 배경 + 검정 글자</td>
+        <td style="text-align:center;padding:10px 12px;">검정 배경 + 노랑 글자</td>
+      </tr>
+      <tr style="border-bottom:1px solid #f5f5f5;">
+        <td style="padding:10px 12px;color:#555;font-weight:600;">선택된 Chip</td>
+        <td style="text-align:center;padding:10px 12px;">노랑 fill</td>
+        <td style="text-align:center;padding:10px 12px;">노랑 ring + 연노랑 배경</td>
+      </tr>
+      <tr style="border-bottom:1px solid #f5f5f5;">
+        <td style="padding:10px 12px;color:#555;font-weight:600;">진행 바 / 도트</td>
+        <td style="text-align:center;padding:10px 12px;">연노랑 배경 + 노랑 fill</td>
+        <td style="text-align:center;padding:10px 12px;">검정 배경 + 노랑 fill</td>
+      </tr>
+      <tr style="border-bottom:1px solid #f5f5f5;">
+        <td style="padding:10px 12px;color:#555;font-weight:600;">전체 무드</td>
+        <td style="text-align:center;padding:10px 12px;">밝고 따뜻함, 카페 감성</td>
+        <td style="text-align:center;padding:10px 12px;">세련됨, 대비 강함</td>
+      </tr>
+      <tr>
+        <td style="padding:10px 12px;color:#555;font-weight:600;">레퍼런스</td>
+        <td style="text-align:center;padding:10px 12px;">Kakao, IMDb, 당근마켓</td>
+        <td style="text-align:center;padding:10px 12px;">Snapchat 앱 내부, 네이버페이</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+</body>
+</html>

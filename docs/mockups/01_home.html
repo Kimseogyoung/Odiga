@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>오디가 — 홈</title>
+<link rel="preconnect" href="https://cdn.jsdelivr.net">
+<link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" rel="stylesheet"/>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --brand:       #FFD663;
+  --brand-light: #FFFBEA;
+  --bg:          #FAFAF8;
+  --card:        #FFFFFF;
+  --text:        #1A1A1A;
+  --sub:         #888888;
+  --weak:        #BBBBBB;
+  --border:      #F0F0F0;
+}
+
+body {
+  font-family: 'Pretendard Variable', Pretendard, -apple-system, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  max-width: 480px;
+  margin: 0 auto;
+  min-height: 100svh;
+}
+
+/* ─── Hero ─── */
+.hero {
+  background: var(--brand);
+  padding: 16px 24px 28px;
+}
+.hero-top {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 16px;
+}
+.logo-row { display: flex; align-items: center; gap: 8px; }
+.logo-text { font-size: 22px; font-weight: 900; letter-spacing: -1px; }
+.menu-btn {
+  width: 36px; height: 36px; border-radius: 50%;
+  background: rgba(0,0,0,0.1); border: none; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  flex-direction: column; gap: 4px; padding: 10px;
+}
+.menu-btn span {
+  display: block; width: 16px; height: 2px;
+  background: var(--text); border-radius: 2px;
+}
+
+/* ─── 드로어 오버레이 ─── */
+.overlay {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.4);
+  opacity: 0; pointer-events: none; z-index: 200;
+  transition: opacity .25s;
+}
+.overlay.open { opacity: 1; pointer-events: auto; }
+
+/* ─── 드로어 패널 ─── */
+.drawer {
+  position: fixed; top: 0; right: -300px; width: 280px; height: 100%;
+  background: var(--card); z-index: 201;
+  transition: right .28s cubic-bezier(.4,0,.2,1);
+  display: flex; flex-direction: column;
+  box-shadow: -8px 0 32px rgba(0,0,0,0.12);
+}
+.drawer.open { right: 0; }
+
+.drawer-head {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 20px 20px 16px;
+  border-bottom: 1px solid var(--border);
+}
+.drawer-logo { display: flex; align-items: center; gap: 8px; }
+.drawer-logo-text { font-size: 18px; font-weight: 900; letter-spacing: -0.8px; }
+.drawer-close {
+  width: 32px; height: 32px; border-radius: 50%;
+  background: #F4F4F0; border: none; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px; color: var(--sub);
+}
+
+.drawer-nav { flex: 1; padding: 12px 12px; display: flex; flex-direction: column; gap: 2px; }
+.drawer-item {
+  display: flex; align-items: center; gap: 12px;
+  padding: 13px 14px; border-radius: 14px;
+  font-size: 15px; font-weight: 600; color: var(--sub);
+  text-decoration: none; cursor: pointer;
+  transition: background .12s;
+}
+.drawer-item:hover { background: #F4F4F0; }
+.drawer-item.on { background: var(--brand-light); color: var(--text); font-weight: 700; }
+.drawer-item .di-icon { font-size: 18px; width: 24px; text-align: center; }
+
+.drawer-divider { height: 1px; background: var(--border); margin: 8px 14px; }
+
+.drawer-foot {
+  padding: 12px 12px 28px;
+  border-top: 1px solid var(--border);
+}
+.hero-say { font-size: 22px; font-weight: 900; letter-spacing: -0.6px; line-height: 1.35; }
+.hero-meta { margin-top: 6px; font-size: 13px; color: rgba(26,26,26,0.6); font-weight: 500; }
+
+/* ─── Body ─── */
+.body { padding: 20px 20px 32px; display: flex; flex-direction: column; gap: 14px; }
+
+.card {
+  background: var(--card); border-radius: 20px; padding: 18px 16px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.05), 0 0 0 1px rgba(0,0,0,0.04);
+}
+.card-label { font-size: 13px; font-weight: 700; color: var(--sub); margin-bottom: 12px; }
+
+/* ─── 지역 ─── */
+.region-row { display: flex; gap: 7px; }
+.rbtn {
+  flex: 1; padding: 11px 0; border-radius: 100px;
+  font-size: 13px; font-weight: 700; font-family: inherit;
+  border: none; cursor: pointer; background: #F4F4F0; color: var(--weak); transition: all .15s;
+}
+.rbtn.on { background: var(--brand); color: var(--text); box-shadow: 0 3px 10px rgba(255,214,99,0.4); }
+
+/* ─── 무드 ─── */
+.chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.chip {
+  padding: 8px 16px; border-radius: 100px;
+  font-size: 13px; font-weight: 600; font-family: inherit;
+  border: none; cursor: pointer; background: #F4F4F0; color: var(--sub); transition: all .15s;
+}
+.chip.on { background: var(--brand); color: var(--text); box-shadow: 0 2px 8px rgba(255,214,99,0.4); }
+
+/* ─── 시간 ─── */
+.time-row { display: flex; align-items: center; gap: 10px; }
+.time-box {
+  flex: 1; background: var(--brand-light); border: 1.5px solid var(--brand);
+  border-radius: 14px; padding: 13px 0; text-align: center;
+  font-size: 17px; font-weight: 900; cursor: pointer;
+}
+.time-sep { font-size: 14px; color: var(--weak); }
+
+/* ─── 앱 힌트 말풍선 ─── */
+.hint { display: flex; align-items: flex-end; gap: 8px; }
+.hint-ava {
+  width: 30px; height: 30px; border-radius: 50%;
+  background: var(--brand); border: 2px solid var(--text);
+  flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 14px;
+}
+.hint-bubble {
+  flex: 1; background: var(--card);
+  border-radius: 4px 20px 20px 20px;
+  padding: 12px 16px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+  font-size: 13px; color: #555; line-height: 1.6;
+}
+
+/* ─── CTA ─── */
+.cta {
+  width: 100%; padding: 18px; border-radius: 100px;
+  background: var(--brand); color: var(--text);
+  font-size: 16px; font-weight: 900; font-family: inherit;
+  border: none; cursor: pointer;
+  box-shadow: 0 8px 24px rgba(255,214,99,0.55);
+  letter-spacing: -0.3px;
+}
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <div class="hero-top">
+    <div class="logo-row">
+      <svg width="40" height="31" viewBox="0 0 110 85" fill="none">
+        <path d="M28 14C42 9 58 7 72 8C86 9 98 13 104 20C110 27 110 38 108 50C106 62 100 72 90 76C78 80 58 82 44 80C38 88 34 96 32 102C30 94 28 86 26 80C18 76 12 68 10 56C8 44 8 30 14 20C18 15 22 16 28 14Z" fill="white" stroke="#1A1A1A" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      <span class="logo-text">오디가</span>
+    </div>
+    <button class="menu-btn" onclick="openDrawer()">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+  <div class="hero-say">오늘 <strong>홍대</strong> 어때요? 🙌</div>
+  <div class="hero-meta">☀️ 맑음 · 22도 · 산책하기 딱 좋은 날</div>
+</div>
+
+<div class="body">
+
+  <div class="card">
+    <div class="card-label">📍 어디로 갈까요?</div>
+    <div class="region-row">
+      <button class="rbtn">성수</button>
+      <button class="rbtn on">홍대</button>
+      <button class="rbtn">연남</button>
+      <button class="rbtn">이태원</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-label">🏷️ 오늘의 무드</div>
+    <div class="chips">
+      <button class="chip on">감성</button>
+      <button class="chip on">카페</button>
+      <button class="chip">힙한</button>
+      <button class="chip">디저트</button>
+      <button class="chip">빈티지</button>
+      <button class="chip">포토스팟</button>
+      <button class="chip">존맛</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-label">🕐 몇 시부터 몇 시까지?</div>
+    <div class="time-row">
+      <div class="time-box">12:00</div>
+      <span class="time-sep">—</span>
+      <div class="time-box">18:00</div>
+    </div>
+  </div>
+
+  <div class="hint">
+    <div class="hint-ava">💬</div>
+    <div class="hint-bubble">✨ 요즘 홍대에서 앤트러사이트랑 몽중헌이 핫해요! 코스에 넣어드릴까요?</div>
+  </div>
+
+  <button class="cta">그럼 출발할까요? →</button>
+
+</div>
+
+<!-- 드로어 오버레이 -->
+<div class="overlay" id="overlay" onclick="closeDrawer()"></div>
+
+<!-- 드로어 패널 -->
+<div class="drawer" id="drawer">
+  <div class="drawer-head">
+    <div class="drawer-logo">
+      <svg width="28" height="22" viewBox="0 0 110 85" fill="none">
+        <path d="M28 14C42 9 58 7 72 8C86 9 98 13 104 20C110 27 110 38 108 50C106 62 100 72 90 76C78 80 58 82 44 80C38 88 34 96 32 102C30 94 28 86 26 80C18 76 12 68 10 56C8 44 8 30 14 20C18 15 22 16 28 14Z" fill="#FFD663" stroke="#1A1A1A" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      <span class="drawer-logo-text">오디가</span>
+    </div>
+    <button class="drawer-close" onclick="closeDrawer()">✕</button>
+  </div>
+
+  <nav class="drawer-nav">
+    <a class="drawer-item on">
+      <span class="di-icon">🗺️</span> 홈
+    </a>
+    <a class="drawer-item">
+      <span class="di-icon">📋</span> 내 코스
+    </a>
+    <a class="drawer-item">
+      <span class="di-icon">🔍</span> 탐색
+    </a>
+    <div class="drawer-divider"></div>
+    <a class="drawer-item">
+      <span class="di-icon">⚙️</span> 설정
+    </a>
+  </nav>
+
+  <div class="drawer-foot">
+    <a class="drawer-item">
+      <span class="di-icon">👤</span> 로그인 / 마이페이지
+    </a>
+  </div>
+</div>
+
+<script>
+function openDrawer() {
+  document.getElementById('drawer').classList.add('open');
+  document.getElementById('overlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function closeDrawer() {
+  document.getElementById('drawer').classList.remove('open');
+  document.getElementById('overlay').classList.remove('open');
+  document.body.style.overflow = '';
+}
+</script>
+
+</body>
+</html>

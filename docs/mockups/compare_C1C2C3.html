@@ -1,0 +1,694 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Odiga — C1 · C2 · C3 비교</title>
+<link rel="preconnect" href="https://cdn.jsdelivr.net">
+<link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" rel="stylesheet"/>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Pretendard Variable', Pretendard, -apple-system, sans-serif;
+  background: #E8E4DC;
+  padding: 48px 20px 80px;
+  color: #1A1A1A;
+}
+
+h1 { text-align:center; font-size:22px; font-weight:900; letter-spacing:-0.5px; margin-bottom:6px; }
+.subtitle { text-align:center; font-size:13px; color:#888; margin-bottom:48px; }
+
+.compare-row {
+  display: flex;
+  gap: 28px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.col { display:flex; flex-direction:column; align-items:center; gap:14px; }
+.col-badge {
+  font-size:12px; font-weight:800; letter-spacing:1.5px; text-transform:uppercase;
+  padding:6px 18px; border-radius:100px;
+}
+.col-desc { font-size:12px; color:#999; text-align:center; max-width:220px; line-height:1.6; }
+
+/* ═══════════════════════════════════════
+   공통 폰 프레임
+═══════════════════════════════════════ */
+.phone {
+  width: 340px;
+  border-radius: 44px;
+  overflow: hidden;
+  position: relative;
+}
+.notch {
+  height: 48px;
+  display: flex; align-items:center; justify-content:center;
+}
+.notch-bar { width:110px; height:5px; border-radius:100px; opacity:.13; }
+.screen { padding: 2px 20px 0; display:flex; flex-direction:column; gap:14px; }
+.nav {
+  margin: 4px -20px 0;
+  padding: 14px 24px 28px;
+  display:flex; justify-content:space-around;
+}
+.nav-item {
+  display:flex; flex-direction:column; align-items:center; gap:4px;
+  font-size:10px; font-weight:700;
+}
+.nav-icon {
+  width:26px; height:26px;
+  display:flex; align-items:center; justify-content:center; font-size:15px;
+}
+
+/* 공통 말풍선 SVG */
+.bubble-logo svg { display:block; }
+
+/* ═══════════════════════════════════════
+   C1 — 손그림 스티커
+   특징: 검정 테두리 카드 + 오프셋 그림자
+═══════════════════════════════════════ */
+.c1 {
+  background: #FFFCF0;
+  box-shadow: 6px 6px 0 #1A1A1A, 0 0 0 2px #1A1A1A;
+}
+.c1 .notch { background:#FFFCF0; }
+.c1 .notch-bar { background:#1A1A1A; }
+
+.c1 .header {
+  display:flex; align-items:center; justify-content:space-between; padding:6px 0;
+}
+.c1 .logo-area { display:flex; align-items:center; gap:8px; }
+.c1 .logo-text { font-size:22px; font-weight:900; letter-spacing:-1.5px; }
+.c1 .header-btn {
+  width:34px; height:34px; border-radius:50%;
+  border:2px solid #1A1A1A;
+  display:flex; align-items:center; justify-content:center; font-size:16px;
+  background:#fff;
+}
+
+.c1 .greeting { padding:2px 0; }
+.c1 .greeting-main {
+  font-size:21px; font-weight:900; letter-spacing:-0.8px; line-height:1.3; color:#1A1A1A;
+}
+.c1 .greeting-main em {
+  font-style:normal;
+  background:#FFD663;
+  padding:1px 5px 2px;
+  border-radius:5px;
+  border-bottom:2.5px solid #1A1A1A;
+}
+.c1 .greeting-sub { margin-top:5px; font-size:12px; color:#888; }
+
+.c1 .card {
+  background:#fff;
+  border:2px solid #1A1A1A;
+  border-radius:18px;
+  padding:16px 14px;
+  box-shadow: 3px 3px 0 #1A1A1A;
+}
+.c1 .card-title { font-size:12px; font-weight:700; color:#888; margin-bottom:11px; }
+
+.c1 .region-row { display:flex; gap:7px; }
+.c1 .rbtn {
+  flex:1; padding:10px 0; border-radius:12px;
+  font-size:13px; font-weight:800; font-family:inherit;
+  border:2px solid #1A1A1A; cursor:pointer;
+  background:#F5F5F0; color:#888;
+  box-shadow: 2px 2px 0 #1A1A1A;
+  transition: all .12s;
+}
+.c1 .rbtn.on { background:#FFD663; color:#1A1A1A; box-shadow: 2px 2px 0 #1A1A1A; }
+
+.c1 .chips { display:flex; flex-wrap:wrap; gap:7px; }
+.c1 .chip {
+  padding:7px 13px; border-radius:100px;
+  font-size:12px; font-weight:700; font-family:inherit;
+  border:2px solid #DCDCD8; background:#F5F5F0; color:#888; cursor:pointer;
+}
+.c1 .chip.on {
+  border-color:#1A1A1A; background:#FFD663; color:#1A1A1A;
+  box-shadow: 2px 2px 0 #1A1A1A;
+}
+
+.c1 .time-row { display:flex; align-items:center; gap:8px; }
+.c1 .time-box {
+  flex:1; border:2px solid #1A1A1A; border-radius:12px;
+  padding:11px 0; text-align:center;
+  font-size:16px; font-weight:900; color:#1A1A1A;
+  background:#FFFCF0;
+  box-shadow: 2px 2px 0 #1A1A1A;
+}
+.c1 .time-sep { font-size:14px; color:#bbb; }
+
+.c1 .spots-row { display:flex; gap:8px; }
+.c1 .spot {
+  flex:1; border:2px solid #1A1A1A; border-radius:14px;
+  padding:12px 10px; background:#fff; position:relative; overflow:hidden;
+  box-shadow: 2px 2px 0 #1A1A1A;
+}
+.c1 .spot-tag {
+  display:inline-block; background:#FFD663; color:#1A1A1A;
+  font-size:10px; font-weight:800; padding:2px 8px;
+  border-radius:100px; border:1.5px solid #1A1A1A; margin-bottom:6px;
+}
+.c1 .spot-name { font-size:13px; font-weight:900; letter-spacing:-0.3px; }
+.c1 .spot-desc { font-size:11px; color:#888; margin-top:2px; }
+.c1 .spot-emoji { position:absolute; bottom:8px; right:10px; font-size:22px; }
+
+.c1 .cta {
+  width:100%; padding:16px;
+  background:#1A1A1A; color:#FFD663;
+  font-size:15px; font-weight:900; font-family:inherit;
+  border:2px solid #1A1A1A; border-radius:16px; cursor:pointer;
+  display:flex; align-items:center; justify-content:center; gap:8px;
+  box-shadow: 3px 3px 0 rgba(0,0,0,0.2);
+}
+.c1 .cta-badge {
+  width:24px; height:24px; border-radius:50%;
+  background:#FFD663; color:#1A1A1A;
+  display:flex; align-items:center; justify-content:center;
+  font-size:12px; font-weight:900;
+}
+
+.c1 .nav { background:#fff; border-top:2px solid #1A1A1A; }
+.c1 .nav-item { color:#bbb; }
+.c1 .nav-item.on { color:#1A1A1A; }
+.c1 .nav-icon { border-radius:8px; }
+.c1 .nav-item.on .nav-icon { background:#FFD663; border-radius:8px; }
+
+
+/* ═══════════════════════════════════════
+   C2 — 앱이 말을 건다
+   특징: 헤더 = 거대 말풍선, 대화형 UI
+═══════════════════════════════════════ */
+.c2 {
+  background: #FAFAF8;
+  box-shadow: 0 32px 80px rgba(0,0,0,0.14), 0 0 0 1px rgba(0,0,0,0.06);
+}
+.c2 .notch { background:#FAFAF8; }
+.c2 .notch-bar { background:#1A1A1A; }
+
+/* 말풍선 헤더 영역 */
+.c2 .bubble-header {
+  position:relative;
+  margin: 0 -20px;
+  background: #FFD663;
+  padding: 20px 28px 36px;
+  z-index: 1;
+}
+.c2 .bh-top { display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; }
+.c2 .logo-row { display:flex; align-items:center; gap:8px; }
+.c2 .logo-text { font-size:20px; font-weight:900; letter-spacing:-1px; color:#1A1A1A; }
+.c2 .header-btn {
+  width:32px; height:32px; border-radius:50%; background:rgba(0,0,0,0.1);
+  display:flex; align-items:center; justify-content:center; font-size:16px;
+}
+.c2 .bubble-say { font-size:20px; font-weight:900; letter-spacing:-0.7px; line-height:1.3; color:#1A1A1A; }
+.c2 .bubble-sub { font-size:12px; color:rgba(26,26,26,0.55); margin-top:5px; font-weight:500; }
+
+.c2 .screen { padding-top:32px; }
+
+.c2 .card {
+  background:#fff; border-radius:20px; padding:16px 14px;
+  box-shadow: 0 2px 14px rgba(0,0,0,0.06), 0 0 0 1px rgba(0,0,0,0.04);
+}
+.c2 .card-title { font-size:12px; font-weight:700; color:#888; margin-bottom:11px; }
+
+.c2 .region-row { display:flex; gap:6px; }
+.c2 .rbtn {
+  flex:1; padding:10px 0; border-radius:100px;
+  font-size:13px; font-weight:700; font-family:inherit;
+  border:none; cursor:pointer; background:#F4F4F0; color:#999;
+  transition:all .15s;
+}
+.c2 .rbtn.on { background:#FFD663; color:#1A1A1A; box-shadow:0 3px 10px rgba(255,214,99,0.4); }
+
+.c2 .chips { display:flex; flex-wrap:wrap; gap:7px; }
+.c2 .chip {
+  padding:7px 14px; border-radius:100px;
+  font-size:12px; font-weight:700; font-family:inherit;
+  border:none; background:#F4F4F0; color:#999; cursor:pointer;
+}
+.c2 .chip.on { background:#FFD663; color:#1A1A1A; box-shadow:0 2px 8px rgba(255,214,99,0.4); }
+
+.c2 .time-row { display:flex; align-items:center; gap:8px; }
+.c2 .time-box {
+  flex:1; background:#FFFBEA; border:1.5px solid #FFD663; border-radius:14px;
+  padding:12px 0; text-align:center;
+  font-size:16px; font-weight:900; color:#1A1A1A;
+}
+.c2 .time-sep { font-size:14px; color:#ccc; }
+
+/* 대화형 스타일 — 앱 말풍선 */
+.c2 .app-bubble-wrap { display:flex; align-items:flex-end; gap:8px; }
+.c2 .app-avatar {
+  width:28px; height:28px; border-radius:50%;
+  background:#FFD663; border:2px solid #1A1A1A;
+  display:flex; align-items:center; justify-content:center;
+  font-size:14px; flex-shrink:0;
+}
+.c2 .app-bubble {
+  flex:1; background:#fff;
+  border-radius:4px 20px 20px 20px;
+  padding:12px 14px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+  font-size:12px; color:#555; line-height:1.6;
+}
+.c2 .spots-row { display:flex; gap:8px; }
+.c2 .spot {
+  flex:1; background:#F8F8F6; border-radius:16px; padding:12px 10px; position:relative; overflow:hidden;
+}
+.c2 .spot-tag {
+  display:inline-block; background:#FFD663; color:#1A1A1A;
+  font-size:10px; font-weight:800; padding:2px 8px; border-radius:100px; margin-bottom:6px;
+}
+.c2 .spot-name { font-size:13px; font-weight:900; letter-spacing:-0.3px; }
+.c2 .spot-desc { font-size:11px; color:#888; margin-top:2px; }
+.c2 .spot-emoji { position:absolute; bottom:8px; right:10px; font-size:20px; }
+
+.c2 .cta {
+  width:100%; padding:17px; border-radius:100px;
+  background:#FFD663; color:#1A1A1A;
+  font-size:15px; font-weight:900; font-family:inherit; border:none; cursor:pointer;
+  box-shadow:0 6px 20px rgba(255,214,99,0.5);
+  letter-spacing:-0.3px;
+}
+
+.c2 .nav { background:#fff; border-top:1px solid #f0f0f0; }
+.c2 .nav-item { color:#ccc; }
+.c2 .nav-item.on { color:#1A1A1A; }
+.c2 .nav-item.on .nav-icon { background:#FFD663; border-radius:8px; }
+
+
+/* ═══════════════════════════════════════
+   C3 — 동글 팝
+   특징: 테두리 없음, 최대 pill, 노랑 그림자, 컬러 팝
+═══════════════════════════════════════ */
+.c3 {
+  background: #FFFCF0;
+  box-shadow: 0 32px 80px rgba(0,0,0,0.1), 0 0 0 1px rgba(0,0,0,0.04);
+}
+.c3 .notch { background:#FFFCF0; }
+.c3 .notch-bar { background:#1A1A1A; }
+
+.c3 .header {
+  display:flex; align-items:center; justify-content:space-between; padding:4px 0;
+}
+.c3 .logo-area { display:flex; align-items:center; gap:8px; }
+.c3 .logo-text { font-size:22px; font-weight:900; letter-spacing:-1.5px; }
+.c3 .header-btn {
+  width:34px; height:34px; border-radius:50%;
+  background:#FFD663;
+  display:flex; align-items:center; justify-content:center; font-size:16px;
+}
+
+.c3 .greeting { padding:2px 0; }
+.c3 .greeting-tag {
+  display:inline-block;
+  background:#1A1A1A; color:#FFD663;
+  font-size:11px; font-weight:800; padding:4px 12px;
+  border-radius:100px; margin-bottom:10px; letter-spacing:0.3px;
+}
+.c3 .greeting-main {
+  font-size:22px; font-weight:900; letter-spacing:-0.8px; line-height:1.3; color:#1A1A1A;
+}
+.c3 .greeting-main strong { color:#1A1A1A; }
+.c3 .greeting-main .hl {
+  display:inline-block;
+  background:#FFD663; padding:0 6px 2px; border-radius:8px;
+}
+.c3 .greeting-sub { margin-top:6px; font-size:12px; color:#aaa; font-weight:500; }
+
+.c3 .card {
+  background:#fff; border-radius:24px; padding:18px 16px;
+  box-shadow: 0 4px 20px rgba(255,214,99,0.2), 0 1px 4px rgba(0,0,0,0.04);
+}
+.c3 .card-title { font-size:12px; font-weight:700; color:#bbb; margin-bottom:12px; letter-spacing:0.3px; }
+
+.c3 .region-row { display:flex; gap:7px; }
+.c3 .rbtn {
+  flex:1; padding:11px 0; border-radius:100px;
+  font-size:13px; font-weight:800; font-family:inherit;
+  border:none; cursor:pointer; background:#F4F4F0; color:#bbb;
+  transition:all .15s;
+}
+.c3 .rbtn.on {
+  background:#FFD663; color:#1A1A1A;
+  box-shadow:0 4px 14px rgba(255,214,99,0.5);
+  transform:scale(1.04);
+}
+
+.c3 .chips { display:flex; flex-wrap:wrap; gap:7px; }
+.c3 .chip {
+  padding:8px 16px; border-radius:100px;
+  font-size:12px; font-weight:700; font-family:inherit;
+  border:none; background:#F4F4F0; color:#bbb; cursor:pointer;
+  transition:all .12s;
+}
+.c3 .chip.on {
+  background:#FFD663; color:#1A1A1A;
+  box-shadow:0 3px 10px rgba(255,214,99,0.45);
+  transform:scale(1.05);
+}
+
+.c3 .time-row { display:flex; align-items:center; gap:10px; }
+.c3 .time-box {
+  flex:1; background:#FFFBEA; border-radius:100px;
+  padding:13px 0; text-align:center;
+  font-size:16px; font-weight:900; color:#1A1A1A;
+  box-shadow:0 3px 12px rgba(255,214,99,0.3);
+}
+.c3 .time-sep { font-size:16px; color:#ddd; font-weight:300; }
+
+.c3 .spots-row { display:flex; gap:9px; }
+.c3 .spot {
+  flex:1; border-radius:20px; padding:14px 12px; position:relative; overflow:hidden;
+  box-shadow:0 3px 14px rgba(0,0,0,0.06);
+}
+.c3 .spot:first-child { background:linear-gradient(135deg, #FFFBEA 0%, #FFF3C0 100%); }
+.c3 .spot:last-child { background:linear-gradient(135deg, #F0FFF8 0%, #DCF8EC 100%); }
+.c3 .spot-tag {
+  display:inline-block; background:#FFD663; color:#1A1A1A;
+  font-size:10px; font-weight:800; padding:3px 9px; border-radius:100px; margin-bottom:7px;
+}
+.c3 .spot:last-child .spot-tag { background:#4ADE80; }
+.c3 .spot-name { font-size:13px; font-weight:900; letter-spacing:-0.3px; }
+.c3 .spot-desc { font-size:11px; color:#888; margin-top:2px; }
+.c3 .spot-emoji { position:absolute; bottom:8px; right:10px; font-size:22px; }
+
+.c3 .cta {
+  width:100%; padding:18px; border-radius:100px;
+  background:#FFD663; color:#1A1A1A;
+  font-size:16px; font-weight:900; font-family:inherit; border:none; cursor:pointer;
+  box-shadow:0 8px 24px rgba(255,214,99,0.55);
+  display:flex; align-items:center; justify-content:center; gap:8px;
+  letter-spacing:-0.3px;
+}
+.c3 .cta-dot {
+  width:26px; height:26px; border-radius:50%;
+  background:#1A1A1A; color:#FFD663;
+  display:flex; align-items:center; justify-content:center; font-size:13px;
+}
+
+.c3 .nav {
+  background:linear-gradient(to top, #FFFCF0, #FFFCF0);
+  border-top:1px solid rgba(0,0,0,0.05);
+}
+.c3 .nav-item { color:#ccc; }
+.c3 .nav-item.on { color:#1A1A1A; }
+.c3 .nav-item.on .nav-icon {
+  background:#FFD663; border-radius:10px;
+  box-shadow:0 3px 8px rgba(255,214,99,0.45);
+}
+
+/* 비교표 */
+.compare-table {
+  max-width: 900px; margin: 56px auto 0;
+  background:#fff; border-radius:24px; padding:28px 32px;
+  box-shadow:0 2px 12px rgba(0,0,0,0.06);
+}
+.compare-table p { font-size:13px; font-weight:800; color:#888; letter-spacing:1.5px; text-transform:uppercase; margin-bottom:16px; }
+table { width:100%; border-collapse:collapse; font-size:13px; }
+th { padding:9px 12px; font-weight:700; color:#aaa; }
+td { padding:10px 12px; border-top:1px solid #f5f5f5; }
+td:first-child { font-weight:700; color:#555; }
+td:not(:first-child) { text-align:center; }
+</style>
+</head>
+<body>
+
+<h1>C1 · C2 · C3 비교</h1>
+<p class="subtitle">말풍선 로고 컨셉 · 발랄하고 귀여운 동글동글</p>
+
+<div class="compare-row">
+
+<!-- ══════════ C1: 손그림 스티커 ══════════ -->
+<div class="col">
+  <span class="col-badge" style="background:#FFD663;color:#1A1A1A;border:2.5px solid #1A1A1A;box-shadow:3px 3px 0 #1A1A1A;">C1 손그림 스티커</span>
+  <span class="col-desc">검정 테두리 + 오프셋 그림자<br>스티커 붙인 느낌, 핀테크 탈출</span>
+  <div class="phone c1">
+    <div class="notch"><div class="notch-bar"></div></div>
+    <div class="screen">
+      <!-- 헤더 -->
+      <div class="c1 header">
+        <div class="logo-area">
+          <svg width="44" height="34" viewBox="0 0 56 44" fill="none">
+            <path d="M10 3C5.5 3 3 6 3 11V27C3 32 5.5 35 10 35H17C16 39 14 43 12 47C17 42 21 38 24 35L46 35C50.5 35 53 32 53 27V11C53 6 50.5 3 46 3Z" fill="white" stroke="#1A1A1A" stroke-width="3.8" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          <span class="logo-text">오디가</span>
+        </div>
+        <div class="header-btn">🔔</div>
+      </div>
+      <!-- 인사 -->
+      <div class="greeting">
+        <div class="greeting-main">오늘 <em>홍대</em> 어때요?</div>
+        <div class="greeting-sub">☀️ 맑음 · 22도 · 산책하기 딱 좋은 날</div>
+      </div>
+      <!-- 지역 -->
+      <div class="card">
+        <div class="card-title">📍 어디로 갈까요?</div>
+        <div class="region-row">
+          <button class="rbtn">성수</button>
+          <button class="rbtn on">홍대</button>
+          <button class="rbtn">연남</button>
+          <button class="rbtn">이태원</button>
+        </div>
+      </div>
+      <!-- 무드 -->
+      <div class="card">
+        <div class="card-title">🏷️ 오늘의 무드</div>
+        <div class="chips">
+          <button class="chip on">감성</button>
+          <button class="chip on">카페</button>
+          <button class="chip">힙한</button>
+          <button class="chip">디저트</button>
+          <button class="chip">빈티지</button>
+          <button class="chip">포토스팟</button>
+        </div>
+      </div>
+      <!-- 시간 -->
+      <div class="card">
+        <div class="card-title">🕐 몇 시부터 몇 시까지?</div>
+        <div class="time-row">
+          <div class="time-box">12:00</div>
+          <span class="time-sep">—</span>
+          <div class="time-box">18:00</div>
+        </div>
+      </div>
+      <!-- 핫플 -->
+      <div class="card">
+        <div class="card-title">✨ 요즘 뜨는 곳</div>
+        <div class="spots-row">
+          <div class="spot">
+            <div class="spot-tag">카페</div>
+            <div class="spot-name">앤트러사이트</div>
+            <div class="spot-desc">홍대 · 감성 공간</div>
+            <div class="spot-emoji">☕</div>
+          </div>
+          <div class="spot">
+            <div class="spot-tag">디저트</div>
+            <div class="spot-name">몽중헌</div>
+            <div class="spot-desc">홍대 · 빙수 맛집</div>
+            <div class="spot-emoji">🍧</div>
+          </div>
+        </div>
+      </div>
+      <!-- CTA -->
+      <button class="cta">코스 짜러 가기 <span class="cta-badge">→</span></button>
+      <!-- 네비 -->
+      <div class="nav">
+        <div class="nav-item on"><div class="nav-icon">🗺️</div>홈</div>
+        <div class="nav-item"><div class="nav-icon">🔍</div>탐색</div>
+        <div class="nav-item"><div class="nav-icon">📋</div>내 코스</div>
+        <div class="nav-item"><div class="nav-icon">👤</div>마이</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════ C2: 앱이 말을 건다 ══════════ -->
+<div class="col">
+  <span class="col-badge" style="background:#1A1A1A;color:#FFD663;border:2px solid #1A1A1A;">C2 앱이 말을 건다</span>
+  <span class="col-desc">헤더 전체 = 말풍선<br>앱이 직접 대화하는 느낌</span>
+  <div class="phone c2">
+    <div class="notch"><div class="notch-bar"></div></div>
+    <!-- 말풍선 헤더 -->
+    <div class="bubble-header">
+      <div class="bh-top">
+        <div class="logo-row">
+          <svg width="42" height="33" viewBox="0 0 110 85" fill="none">
+            <path d="M28 14C42 9 58 7 72 8C86 9 98 13 104 20C110 27 110 38 108 50C106 62 100 72 90 76C78 80 58 82 44 80C38 88 34 96 32 102C30 94 28 86 26 80C18 76 12 68 10 56C8 44 8 30 14 20C18 15 22 16 28 14Z" fill="white" stroke="#1A1A1A" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          <span class="logo-text">오디가</span>
+        </div>
+        <div class="header-btn">🔔</div>
+      </div>
+      <div class="bubble-say">오늘 <strong>홍대</strong> 어때요? 🙌</div>
+      <div class="bubble-sub">☀️ 맑음 · 22도 · 산책하기 딱 좋은 날</div>
+    </div>
+    <div class="screen">
+      <!-- 지역 -->
+      <div class="card">
+        <div class="card-title">📍 어디로 갈까요?</div>
+        <div class="region-row">
+          <button class="rbtn">성수</button>
+          <button class="rbtn on">홍대</button>
+          <button class="rbtn">연남</button>
+          <button class="rbtn">이태원</button>
+        </div>
+      </div>
+      <!-- 무드 -->
+      <div class="card">
+        <div class="card-title">🏷️ 오늘의 무드</div>
+        <div class="chips">
+          <button class="chip on">감성</button>
+          <button class="chip on">카페</button>
+          <button class="chip">힙한</button>
+          <button class="chip">디저트</button>
+          <button class="chip">빈티지</button>
+          <button class="chip">포토스팟</button>
+        </div>
+      </div>
+      <!-- 시간 -->
+      <div class="card">
+        <div class="card-title">🕐 몇 시부터 몇 시까지?</div>
+        <div class="time-row">
+          <div class="time-box">12:00</div>
+          <span class="time-sep">~</span>
+          <div class="time-box">18:00</div>
+        </div>
+      </div>
+      <!-- 앱 말풍선 힌트 -->
+      <div class="app-bubble-wrap">
+        <div class="app-avatar">💬</div>
+        <div class="app-bubble">✨ 요즘 홍대에서 앤트러사이트랑 몽중헌이 핫해요! 코스에 넣어드릴까요?</div>
+      </div>
+      <!-- CTA -->
+      <button class="cta">그럼 출발할까요? →</button>
+      <!-- 네비 -->
+      <div class="nav">
+        <div class="nav-item on"><div class="nav-icon">🗺️</div>홈</div>
+        <div class="nav-item"><div class="nav-icon">🔍</div>탐색</div>
+        <div class="nav-item"><div class="nav-icon">📋</div>내 코스</div>
+        <div class="nav-item"><div class="nav-icon">👤</div>마이</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════ C3: 동글 팝 ══════════ -->
+<div class="col">
+  <span class="col-badge" style="background:#FFFBEA;color:#1A1A1A;border:1.5px solid #FFD663;box-shadow:0 3px 10px rgba(255,214,99,0.4);">C3 동글 팝</span>
+  <span class="col-desc">테두리 없음 · 노랑 그림자<br>pill 최대화 · 컬러 팝</span>
+  <div class="phone c3">
+    <div class="notch"><div class="notch-bar"></div></div>
+    <div class="screen">
+      <!-- 헤더 -->
+      <div class="c3 header">
+        <div class="logo-area">
+          <svg width="40" height="32" viewBox="0 0 56 44" fill="none">
+            <path d="M10 3C5.5 3 3 6 3 11V27C3 32 5.5 35 10 35H17C16 39 14 43 12 47C17 42 21 38 24 35L46 35C50.5 35 53 32 53 27V11C53 6 50.5 3 46 3Z" fill="#FFD663" stroke="#1A1A1A" stroke-width="3.8" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          <span class="logo-text">오디가</span>
+        </div>
+        <div class="header-btn">🔔</div>
+      </div>
+      <!-- 인사 -->
+      <div class="greeting">
+        <div class="greeting-tag">📍 홍대 탐험 중</div>
+        <div class="greeting-main">오늘 <span class="hl">홍대</span> 어때요?</div>
+        <div class="greeting-sub">☀️ 맑음 · 22도 · 산책하기 딱 좋은 날</div>
+      </div>
+      <!-- 지역 -->
+      <div class="card">
+        <div class="card-title">📍 어디로 갈까요?</div>
+        <div class="region-row">
+          <button class="rbtn">성수</button>
+          <button class="rbtn on">홍대</button>
+          <button class="rbtn">연남</button>
+          <button class="rbtn">이태원</button>
+        </div>
+      </div>
+      <!-- 무드 -->
+      <div class="card">
+        <div class="card-title">🏷️ 오늘의 무드</div>
+        <div class="chips">
+          <button class="chip on">감성</button>
+          <button class="chip on">카페</button>
+          <button class="chip">힙한</button>
+          <button class="chip">디저트</button>
+          <button class="chip">빈티지</button>
+          <button class="chip">포토스팟</button>
+        </div>
+      </div>
+      <!-- 시간 -->
+      <div class="card">
+        <div class="card-title">🕐 몇 시부터 몇 시까지?</div>
+        <div class="time-row">
+          <div class="time-box">12:00</div>
+          <span class="time-sep">·</span>
+          <div class="time-box">18:00</div>
+        </div>
+      </div>
+      <!-- 핫플 -->
+      <div class="card">
+        <div class="card-title">✨ 요즘 뜨는 곳</div>
+        <div class="spots-row">
+          <div class="spot">
+            <div class="spot-tag">카페</div>
+            <div class="spot-name">앤트러사이트</div>
+            <div class="spot-desc">홍대 · 감성 공간</div>
+            <div class="spot-emoji">☕</div>
+          </div>
+          <div class="spot">
+            <div class="spot-tag">디저트</div>
+            <div class="spot-name">몽중헌</div>
+            <div class="spot-desc">홍대 · 빙수 맛집</div>
+            <div class="spot-emoji">🍧</div>
+          </div>
+        </div>
+      </div>
+      <!-- CTA -->
+      <button class="cta">코스 짜러 가기 <span class="cta-dot">→</span></button>
+      <!-- 네비 -->
+      <div class="nav">
+        <div class="nav-item on"><div class="nav-icon">🗺️</div>홈</div>
+        <div class="nav-item"><div class="nav-icon">🔍</div>탐색</div>
+        <div class="nav-item"><div class="nav-icon">📋</div>내 코스</div>
+        <div class="nav-item"><div class="nav-icon">👤</div>마이</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</div><!-- /compare-row -->
+
+<!-- 비교표 -->
+<div class="compare-table">
+  <p>각 방향 특징 비교</p>
+  <table>
+    <thead>
+      <tr>
+        <th></th>
+        <th><span style="background:#FFD663;color:#1A1A1A;padding:3px 10px;border-radius:100px;border:2px solid #1A1A1A;font-size:12px;">C1 손그림</span></th>
+        <th><span style="background:#1A1A1A;color:#FFD663;padding:3px 10px;border-radius:100px;font-size:12px;">C2 말하는 앱</span></th>
+        <th><span style="background:#FFFBEA;color:#1A1A1A;padding:3px 10px;border-radius:100px;border:1.5px solid #FFD663;font-size:12px;">C3 동글 팝</span></th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td>카드 스타일</td><td>검정 테두리 + 오프셋 그림자</td><td>섀도우 only, 깔끔</td><td>노랑 틴트 그림자</td></tr>
+      <tr><td>말풍선 로고</td><td>헤더에 small 로고</td><td>헤더 전체가 말풍선</td><td>로고에 노랑 fill</td></tr>
+      <tr><td>CTA 버튼</td><td>검정 배경 + 노랑 글자</td><td>노랑 pill (Pattern A)</td><td>노랑 pill (Pattern A)</td></tr>
+      <tr><td>chip 선택</td><td>노랑 fill + 검정 테두리</td><td>노랑 fill</td><td>노랑 fill + scale 효과</td></tr>
+      <tr><td>전체 무드</td><td>잡지/굿즈 감성, 개성 강함</td><td>친근하고 대화적, 따뜻함</td><td>밝고 가볍고 팝한 느낌</td></tr>
+      <tr><td>핀테크 느낌</td><td>없음 ✓</td><td>없음 ✓</td><td>없음 ✓</td></tr>
+    </tbody>
+  </table>
+</div>
+
+</body>
+</html>
